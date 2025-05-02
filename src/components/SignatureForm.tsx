@@ -111,6 +111,54 @@ const SignatureForm = ({
                 </div>
               </div>
             )}
+            {layoutType === "modern-cards" && (
+              <div className="flex flex-col w-3/4 p-2">
+                <div className="h-3 w-1/2 bg-slate-300 rounded mb-2"></div>
+                <div className="flex flex-wrap gap-1 mt-1">
+                  <div className="h-6 w-14 bg-slate-200 rounded-md flex items-center justify-center">
+                    <div className="h-2 w-8 bg-slate-300 rounded"></div>
+                  </div>
+                  <div className="h-6 w-14 bg-slate-200 rounded-md flex items-center justify-center">
+                    <div className="h-2 w-8 bg-slate-300 rounded"></div>
+                  </div>
+                  <div className="h-6 w-14 bg-slate-200 rounded-md flex items-center justify-center">
+                    <div className="h-2 w-8 bg-slate-300 rounded"></div>
+                  </div>
+                </div>
+              </div>
+            )}
+            {layoutType === "icon-list" && (
+              <div className="flex flex-col w-3/4 p-2">
+                <div className="flex justify-center mb-2">
+                  <div className="h-10 w-10 rounded-full bg-slate-200"></div>
+                </div>
+                <div className="h-3 w-1/2 bg-slate-300 rounded mb-2 mx-auto"></div>
+                <div className="space-y-1">
+                  <div className="flex items-center">
+                    <div className="h-3 w-3 rounded-full bg-slate-300 mr-2"></div>
+                    <div className="h-2 w-24 bg-slate-200 rounded"></div>
+                  </div>
+                  <div className="flex items-center">
+                    <div className="h-3 w-3 rounded-full bg-slate-300 mr-2"></div>
+                    <div className="h-2 w-20 bg-slate-200 rounded"></div>
+                  </div>
+                </div>
+              </div>
+            )}
+            {layoutType === "two-columns" && (
+              <div className="flex justify-between w-3/4 p-2">
+                <div className="w-[45%]">
+                  <div className="h-3 w-full bg-slate-300 rounded mb-2"></div>
+                  <div className="h-2 w-3/4 bg-slate-200 rounded mb-1"></div>
+                  <div className="h-2 w-1/2 bg-slate-200 rounded"></div>
+                </div>
+                <div className="w-[45%]">
+                  <div className="h-3 w-full bg-slate-300 rounded mb-2"></div>
+                  <div className="h-2 w-3/4 bg-slate-200 rounded mb-1"></div>
+                  <div className="h-2 w-1/2 bg-slate-200 rounded"></div>
+                </div>
+              </div>
+            )}
           </div>
           <h3 className="font-medium text-sm">{title}</h3>
           <p className="text-xs text-muted-foreground">{description}</p>
@@ -204,6 +252,24 @@ const SignatureForm = ({
                   title="Stacked" 
                   description="Elements stacked vertically"
                   selected={layout === "stacked"}
+                />
+                <LayoutOption 
+                  layoutType="modern-cards" 
+                  title="Modern Cards" 
+                  description="Contact info in modern card style"
+                  selected={layout === "modern-cards"}
+                />
+                <LayoutOption 
+                  layoutType="icon-list" 
+                  title="Icon List" 
+                  description="Contact details with icons"
+                  selected={layout === "icon-list"}
+                />
+                <LayoutOption 
+                  layoutType="two-columns" 
+                  title="Two Columns" 
+                  description="Information split into two columns"
+                  selected={layout === "two-columns"}
                 />
               </div>
             </div>
