@@ -8,6 +8,7 @@ import { useToast } from "@/components/ui/use-toast";
 
 const Index = () => {
   const [template, setTemplate] = useState<string>("modern");
+  const [layout, setLayout] = useState<string>("standard");
   const [signatureData, setSignatureData] = useState({
     fullName: "John Doe",
     jobTitle: "Marketing Manager",
@@ -46,9 +47,15 @@ const Index = () => {
             setSignatureData={setSignatureData}
             template={template}
             setTemplate={setTemplate}
+            layout={layout}
+            setLayout={setLayout}
           />
           <div className="lg:sticky lg:top-8 self-start">
-            <SignaturePreview signatureData={signatureData} template={template} />
+            <SignaturePreview 
+              signatureData={signatureData} 
+              template={template} 
+              layout={layout}
+            />
           </div>
         </div>
       </div>
@@ -63,8 +70,8 @@ const Index = () => {
               <p className="text-gray-600">Choose from a variety of professional templates designed to impress.</p>
             </div>
             <div className="p-6 rounded-lg border bg-white shadow-sm hover:shadow-md transition-shadow">
-              <h3 className="text-xl font-semibold mb-2">Easy to Use</h3>
-              <p className="text-gray-600">Create your signature in minutes with our intuitive editor.</p>
+              <h3 className="text-xl font-semibold mb-2">Multiple Layouts</h3>
+              <p className="text-gray-600">Customize your signature with different layout options to fit your style.</p>
             </div>
             <div className="p-6 rounded-lg border bg-white shadow-sm hover:shadow-md transition-shadow">
               <h3 className="text-xl font-semibold mb-2">Complete Customization</h3>
