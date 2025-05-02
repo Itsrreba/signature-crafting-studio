@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -6,7 +5,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { ColorPicker, Image, Link, Mail, MapPin, Phone, User } from "lucide-react";
+import { Palette, Image, Link, Mail, MapPin, Phone, User } from "lucide-react";
 
 const SignatureForm = ({ 
   signatureData, 
@@ -146,7 +145,7 @@ const SignatureForm = ({
 
       <div className="space-y-4">
         <h3 className="text-lg font-medium flex items-center gap-2">
-          <ColorPicker className="h-4 w-4" /> Styling Options
+          <Palette className="h-4 w-4" /> Styling Options
         </h3>
         <div className="grid grid-cols-2 gap-4">
           <div className="space-y-2">
