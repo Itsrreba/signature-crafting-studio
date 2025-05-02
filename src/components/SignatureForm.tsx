@@ -159,6 +159,58 @@ const SignatureForm = ({
                 </div>
               </div>
             )}
+            {layoutType === "bordered" && (
+              <div className="flex flex-col items-center w-3/4 p-2 border-2 border-slate-300 rounded-md">
+                <div className="w-1/3 h-8 bg-slate-200 rounded mb-2"></div>
+                <div className="h-3 w-1/2 bg-slate-300 rounded mb-2"></div>
+                <div className="flex gap-3 justify-center">
+                  <div className="h-2 w-8 bg-slate-200 rounded"></div>
+                  <div className="h-2 w-8 bg-slate-200 rounded"></div>
+                  <div className="h-2 w-8 bg-slate-200 rounded"></div>
+                </div>
+              </div>
+            )}
+            {layoutType === "minimalist" && (
+              <div className="flex items-center w-3/4 p-2">
+                <div className="h-12 w-1 bg-slate-400 mr-3"></div>
+                <div className="w-full">
+                  <div className="h-3 w-1/3 bg-slate-300 rounded mb-2"></div>
+                  <div className="h-2 w-2/3 bg-slate-200 rounded mb-1"></div>
+                  <div className="h-2 w-1/2 bg-slate-200 rounded"></div>
+                </div>
+              </div>
+            )}
+            {layoutType === "bubbles" && (
+              <div className="flex flex-col items-center w-3/4 p-2">
+                <div className="w-12 h-12 bg-slate-200 rounded-full mb-2"></div>
+                <div className="h-3 w-1/2 bg-slate-300 rounded mb-2"></div>
+                <div className="flex gap-2 mt-1 justify-center">
+                  <div className="h-6 w-6 rounded-full bg-slate-200"></div>
+                  <div className="h-6 w-6 rounded-full bg-slate-200"></div>
+                  <div className="h-6 w-6 rounded-full bg-slate-200"></div>
+                </div>
+              </div>
+            )}
+            {layoutType === "banner" && (
+              <div className="flex flex-col w-3/4">
+                <div className="h-8 bg-slate-300 rounded-t mb-2 flex items-center justify-center">
+                  <div className="h-3 w-1/3 bg-white rounded"></div>
+                </div>
+                <div className="p-2">
+                  <div className="h-2 w-full bg-slate-200 rounded mb-1"></div>
+                  <div className="h-2 w-4/5 bg-slate-200 rounded mb-1"></div>
+                  <div className="h-2 w-2/3 bg-slate-200 rounded"></div>
+                </div>
+              </div>
+            )}
+            {layoutType === "gradient" && (
+              <div className="flex flex-col w-3/4 bg-gradient-to-r from-slate-200 to-slate-100 p-2 rounded-md">
+                <div className="h-3 w-1/2 bg-white rounded mb-2 mx-auto"></div>
+                <div className="h-2 w-3/4 bg-white rounded-full opacity-70 mb-1 mx-auto"></div>
+                <div className="h-2 w-1/2 bg-white rounded-full opacity-70 mb-1 mx-auto"></div>
+                <div className="h-2 w-1/3 bg-white rounded-full opacity-70 mx-auto"></div>
+              </div>
+            )}
           </div>
           <h3 className="font-medium text-sm">{title}</h3>
           <p className="text-xs text-muted-foreground">{description}</p>
@@ -201,6 +253,8 @@ const SignatureForm = ({
                   <SelectItem value="modern">Modern</SelectItem>
                   <SelectItem value="classic">Classic</SelectItem>
                   <SelectItem value="minimal">Minimal</SelectItem>
+                  <SelectItem value="creative">Creative</SelectItem>
+                  <SelectItem value="professional">Professional</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -228,7 +282,7 @@ const SignatureForm = ({
             {/* Visual layout selection */}
             <div className="space-y-3">
               <Label>Layout Options</Label>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 max-h-[500px] overflow-y-auto pr-2">
                 <LayoutOption 
                   layoutType="standard" 
                   title="Standard" 
@@ -270,6 +324,36 @@ const SignatureForm = ({
                   title="Two Columns" 
                   description="Information split into two columns"
                   selected={layout === "two-columns"}
+                />
+                <LayoutOption 
+                  layoutType="bordered" 
+                  title="Bordered" 
+                  description="Clean design with an elegant border"
+                  selected={layout === "bordered"}
+                />
+                <LayoutOption 
+                  layoutType="minimalist" 
+                  title="Minimalist" 
+                  description="Simple design with minimal elements"
+                  selected={layout === "minimalist"}
+                />
+                <LayoutOption 
+                  layoutType="bubbles" 
+                  title="Bubbles" 
+                  description="Round elements for a playful look"
+                  selected={layout === "bubbles"}
+                />
+                <LayoutOption 
+                  layoutType="banner" 
+                  title="Banner" 
+                  description="Top banner with important information"
+                  selected={layout === "banner"}
+                />
+                <LayoutOption 
+                  layoutType="gradient" 
+                  title="Gradient" 
+                  description="Subtle gradient background effect"
+                  selected={layout === "gradient"}
                 />
               </div>
             </div>
