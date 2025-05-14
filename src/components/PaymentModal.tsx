@@ -2,7 +2,8 @@
 import React from "react";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { CreditCard, DollarSign } from "lucide-react";
+import { Wallet, PayPal, BankNote } from "lucide-react";
+import { toast } from "@/hooks/use-toast";
 
 interface PaymentModalProps {
   isOpen: boolean;
@@ -26,7 +27,19 @@ const PaymentModal = ({ isOpen, onClose, plan }: PaymentModalProps) => {
 
   const handlePaymentSelection = (method: string) => {
     // In a real implementation, this would redirect to the selected payment provider
-    alert(`Redirecting to ${method} for ${planDetails[plan].name} payment...`);
+    toast({
+      title: `Processing ${method} payment`,
+      description: `Preparing ${planDetails[plan].name} purchase. You'll receive access instructions via email shortly.`,
+    });
+    
+    // Simulate payment processing
+    setTimeout(() => {
+      toast({
+        title: "Thank you for your purchase!",
+        description: "We've sent instructions to your email on how to access your new plan.",
+      });
+    }, 2000);
+    
     onClose();
   };
 
@@ -47,7 +60,7 @@ const PaymentModal = ({ isOpen, onClose, plan }: PaymentModalProps) => {
               variant="outline"
               className="w-full justify-start"
             >
-              <CreditCard className="mr-2 h-4 w-4" />
+              <PayPal className="mr-2 h-4 w-4" />
               Pay with PayPal
             </Button>
             <Button
@@ -55,7 +68,7 @@ const PaymentModal = ({ isOpen, onClose, plan }: PaymentModalProps) => {
               variant="outline"
               className="w-full justify-start"
             >
-              <CreditCard className="mr-2 h-4 w-4" />
+              <BankNote className="mr-2 h-4 w-4" />
               Pay with Wise
             </Button>
             <Button
@@ -63,7 +76,7 @@ const PaymentModal = ({ isOpen, onClose, plan }: PaymentModalProps) => {
               variant="outline"
               className="w-full justify-start"
             >
-              <CreditCard className="mr-2 h-4 w-4" />
+              <Wallet className="mr-2 h-4 w-4" />
               Pay with Bank Transfer
             </Button>
           </div>
