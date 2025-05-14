@@ -2,7 +2,7 @@
 import React from "react";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Wallet, PayPal, BankNote } from "lucide-react";
+import { Wallet, Banknote } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 
 interface PaymentModalProps {
@@ -60,7 +60,7 @@ const PaymentModal = ({ isOpen, onClose, plan }: PaymentModalProps) => {
               variant="outline"
               className="w-full justify-start"
             >
-              <PayPal className="mr-2 h-4 w-4" />
+              <Wallet className="mr-2 h-4 w-4" />
               Pay with PayPal
             </Button>
             <Button
@@ -68,7 +68,7 @@ const PaymentModal = ({ isOpen, onClose, plan }: PaymentModalProps) => {
               variant="outline"
               className="w-full justify-start"
             >
-              <BankNote className="mr-2 h-4 w-4" />
+              <Banknote className="mr-2 h-4 w-4" />
               Pay with Wise
             </Button>
             <Button

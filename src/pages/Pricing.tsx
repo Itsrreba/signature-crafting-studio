@@ -1,8 +1,9 @@
+
 import React, { useState } from "react";
 import Header from "@/components/Header";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Check, Wallet, PayPal, BankNote } from "lucide-react";
+import { Check, Wallet, Banknote } from "lucide-react";
 import { Link } from "react-router-dom";
 import PaymentModal from "@/components/PaymentModal";
 
@@ -142,7 +143,7 @@ const PricingPage = () => {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-3xl mx-auto">
             <div className="p-6 rounded-lg border bg-white shadow-sm text-center">
               <div className="h-16 w-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <PayPal className="h-8 w-8 text-brand-purple" />
+                <Wallet className="h-8 w-8 text-brand-purple" />
               </div>
               <h3 className="text-xl font-semibold mb-2">PayPal</h3>
               <p className="text-gray-600">Quick and secure online payments</p>
@@ -150,7 +151,7 @@ const PricingPage = () => {
             
             <div className="p-6 rounded-lg border bg-white shadow-sm text-center">
               <div className="h-16 w-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <BankNote className="h-8 w-8 text-brand-purple" />
+                <Banknote className="h-8 w-8 text-brand-purple" />
               </div>
               <h3 className="text-xl font-semibold mb-2">Wise</h3>
               <p className="text-gray-600">International transfers with low fees</p>
