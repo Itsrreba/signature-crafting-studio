@@ -1,7 +1,7 @@
-import React from "react";
+import React, { useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
-import { Copy } from "lucide-react";
+import { Copy, Download } from "lucide-react";
 
 interface SignatureData {
   fullName: string;
@@ -24,18 +24,26 @@ interface SignaturePreviewProps {
 const SignaturePreview = ({ signatureData, template, layout }: SignaturePreviewProps) => {
   const { toast } = useToast();
   const previewRef = React.useRef<HTMLDivElement>(null);
+  const [imageBase64, setImageBase64] = useState<string | null>(null);
 
-  const handleCopyToClipboard = () => {
+  const handleCopyToClipboard = async () => {
     if (previewRef.current) {
-      const range = document.createRange();
-      range.selectNode(previewRef.current);
-      window.getSelection()?.removeAllRanges();
-      window.getSelection()?.addRange(range);
       try {
-        document.execCommand("copy");
+        // For Gmail compatibility, we use a different approach
+        // First, create a hidden textarea with HTML content
+        const htmlContent = previewRef.current.innerHTML;
+        const textarea = document.createElement('textarea');
+        textarea.style.position = 'fixed';
+        textarea.style.opacity = '0';
+        textarea.value = htmlContent;
+        document.body.appendChild(textarea);
+        textarea.select();
+        document.execCommand('copy');
+        document.body.removeChild(textarea);
+        
         toast({
           title: "Signature copied!",
-          description: "Your email signature has been copied to clipboard",
+          description: "Your email signature has been copied to clipboard. Paste it in Gmail's signature editor.",
         });
       } catch (err) {
         toast({
@@ -44,7 +52,26 @@ const SignaturePreview = ({ signatureData, template, layout }: SignaturePreviewP
           variant: "destructive",
         });
       }
-      window.getSelection()?.removeAllRanges();
+    }
+  };
+
+  const handleDownloadHTML = () => {
+    if (previewRef.current) {
+      const htmlContent = previewRef.current.innerHTML;
+      const blob = new Blob([htmlContent], { type: "text/html" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "email-signature.html";
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+
+      toast({
+        title: "HTML Downloaded",
+        description: "Email signature HTML has been downloaded",
+      });
     }
   };
 
@@ -204,7 +231,7 @@ const SignaturePreview = ({ signatureData, template, layout }: SignaturePreviewP
         <div style={{ fontSize: "13px", color: "#666" }}>
           {signatureData.email && <div>Email: <a href={`mailto:${signatureData.email}`} style={{ color: signatureData.primaryColor || "#9b87f5", textDecoration: "none" }}>{signatureData.email}</a></div>}
           {signatureData.phone && <div>Phone: <a href={`tel:${signatureData.phone}`} style={{ color: signatureData.primaryColor || "#9b87f5", textDecoration: "none" }}>{signatureData.phone}</a></div>}
-          {signatureData.website && <div>Web: <a href={signatureData.website} target="_blank" rel="noopener noreferrer" style={{ color: signatureData.primaryColor || "#9b87f5", textDecoration: "none" }}>{signatureData.website.replace(/^https?:\/\//, "")}</a></div>}
+          {signatureData.website && <div>Web: <a href={signatureData.website} style={{ color: signatureData.primaryColor || "#9b87f5", textDecoration: "none" }}>{signatureData.website.replace(/^https?:\/\//, "")}</a></div>}
           {signatureData.address && <div style={{ marginTop: "3px" }}>{signatureData.address}</div>}
         </div>
       </div>
@@ -1046,6 +1073,110 @@ const SignaturePreview = ({ signatureData, template, layout }: SignaturePreviewP
     </div>
   );
 
+  const renderClassicStandard = () => (
+    <div style={{ fontFamily: "Times New Roman, serif", maxWidth: "500px" }}>
+      <table cellPadding="0" cellSpacing="0" style={{ width: "100%" }}>
+        <tbody>
+          <tr>
+            <td style={{ verticalAlign: "top", paddingRight: "15px" }}>
+              {signatureData.logoUrl && (
+                <img 
+                  src={signatureData.logoUrl} 
+                  alt={`${signatureData.companyName} Logo`} 
+                  style={{ maxWidth: "100px", maxHeight: "100px" }} 
+                />
+              )}
+            </td>
+            <td>
+              <div style={{ 
+                fontSize: "18px", 
+                fontWeight: "bold", 
+                color: signatureData.primaryColor || "#333333" 
+              }}>
+                {signatureData.fullName}
+              </div>
+              <div style={{ fontSize: "14px", color: "#333" }}>
+                {signatureData.jobTitle} {signatureData.companyName ? `| ${signatureData.companyName}` : ""}
+              </div>
+              <div style={{ marginTop: "10px", borderTop: `1px solid ${signatureData.primaryColor || "#333333"}` }}></div>
+              <div style={{ marginTop: "10px", fontSize: "14px", color: "#666" }}>
+                {signatureData.email && <div>Email: <a href={`mailto:${signatureData.email}`} style={{ color: signatureData.primaryColor || "#333333", textDecoration: "none" }}>{signatureData.email}</a></div>}
+                {signatureData.phone && <div>Phone: <a href={`tel:${signatureData.phone}`} style={{ color: signatureData.primaryColor || "#333333", textDecoration: "none" }}>{signatureData.phone}</a></div>}
+                {signatureData.website && <div>Website: <a href={signatureData.website} target="_blank" rel="noopener noreferrer" style={{ color: signatureData.primaryColor || "#333333", textDecoration: "none" }}>{signatureData.website.replace(/^https?:\/\//, "")}</a></div>}
+                {signatureData.address && <div>Address: {signatureData.address}</div>}
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  );
+  
+  const renderClassicCompact = () => (
+    <div style={{ fontFamily: "Times New Roman, serif", maxWidth: "500px" }}>
+      <div style={{ display: "flex", alignItems: "center" }}>
+        {signatureData.logoUrl && (
+          <img 
+            src={signatureData.logoUrl} 
+            alt={`${signatureData.companyName} Logo`} 
+            style={{ maxWidth: "60px", maxHeight: "60px", marginRight: "10px" }} 
+          />
+        )}
+        <div>
+          <div style={{ 
+            fontSize: "16px", 
+            fontWeight: "bold", 
+            color: signatureData.primaryColor || "#333333" 
+          }}>
+            {signatureData.fullName}
+          </div>
+          <div style={{ fontSize: "13px", color: "#333" }}>
+            {signatureData.jobTitle} {signatureData.companyName ? `| ${signatureData.companyName}` : ""}
+          </div>
+        </div>
+      </div>
+      <div style={{ marginTop: "8px", borderTop: `1px solid ${signatureData.primaryColor || "#333333"}` }}></div>
+      <div style={{ marginTop: "8px", fontSize: "12px", color: "#666" }}>
+        <span>
+          {signatureData.email && (
+            <a href={`mailto:${signatureData.email}`} style={{ color: signatureData.primaryColor || "#333333", textDecoration: "none", marginRight: "10px" }}>{signatureData.email}</a>
+          )}
+          {signatureData.phone && (
+            <a href={`tel:${signatureData.phone}`} style={{ color: signatureData.primaryColor || "#333333", textDecoration: "none", marginRight: "10px" }}>{signatureData.phone}</a>
+          )}
+          {signatureData.website && (
+            <a href={signatureData.website} style={{ color: signatureData.primaryColor || "#333333", textDecoration: "none", marginRight: "10px" }}>{signatureData.website.replace(/^https?:\/\//, "")}</a>
+          )}
+        </span>
+        {signatureData.address && <div style={{ marginTop: "5px" }}>{signatureData.address}</div>}
+      </div>
+    </div>
+  );
+  
+  const renderMinimalStandard = () => (
+    <div style={{ fontFamily: "Arial, sans-serif", maxWidth: "450px" }}>
+      <div style={{ fontSize: "16px", fontWeight: "bold" }}>{signatureData.fullName}</div>
+      <div style={{ fontSize: "14px", color: "#555", marginBottom: "8px" }}>{signatureData.jobTitle} {signatureData.companyName ? `| ${signatureData.companyName}` : ""}</div>
+      <div style={{ fontSize: "12px", color: "#777" }}>
+        {signatureData.email && <div>{signatureData.email}</div>}
+        {signatureData.phone && <div>{signatureData.phone}</div>}
+        {signatureData.website && <div>{signatureData.website.replace(/^https?:\/\//, "")}</div>}
+        {signatureData.address && <div>{signatureData.address}</div>}
+      </div>
+    </div>
+  );
+  
+  const renderMinimalCompact = () => (
+    <div style={{ fontFamily: "Arial, sans-serif", maxWidth: "400px" }}>
+      <div style={{ fontSize: "15px", fontWeight: "bold" }}>{signatureData.fullName}</div>
+      <div style={{ fontSize: "12px", color: "#555", marginBottom: "5px" }}>{signatureData.jobTitle}</div>
+      <div style={{ fontSize: "11px", color: "#777" }}>
+        {signatureData.email && <span style={{ marginRight: "8px" }}>{signatureData.email}</span>}
+        {signatureData.phone && <span>{signatureData.phone}</span>}
+      </div>
+    </div>
+  );
+
   const getTemplateComponent = () => {
     // Extended selection based on both template and layout
     if (template === "modern") {
@@ -1118,9 +1249,14 @@ const SignaturePreview = ({ signatureData, template, layout }: SignaturePreviewP
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <h3 className="text-lg font-medium">Signature Preview</h3>
-        <Button onClick={handleCopyToClipboard} variant="outline" size="sm" className="flex items-center gap-1">
-          <Copy className="h-4 w-4" /> Copy
-        </Button>
+        <div className="flex gap-2">
+          <Button onClick={handleCopyToClipboard} variant="outline" size="sm" className="flex items-center gap-1">
+            <Copy className="h-4 w-4" /> Copy
+          </Button>
+          <Button onClick={handleDownloadHTML} variant="outline" size="sm" className="flex items-center gap-1">
+            <Download className="h-4 w-4" /> HTML
+          </Button>
+        </div>
       </div>
       
       <div className="p-6 border rounded-md bg-white min-h-[200px] email-signature-preview">
@@ -1130,7 +1266,8 @@ const SignaturePreview = ({ signatureData, template, layout }: SignaturePreviewP
       </div>
       
       <div className="text-sm text-muted-foreground">
-        <p>Click "Copy" to copy the signature to your clipboard, then paste it into your email client's signature settings.</p>
+        <p>Click "Copy" to copy the signature to your clipboard, then paste it into your email client's signature editor. For Gmail, use "Edit as HTML" paste option.</p>
+        <p className="mt-1">Alternatively, download as HTML and import it into your email client.</p>
       </div>
     </div>
   );

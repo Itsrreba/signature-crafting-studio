@@ -1,13 +1,13 @@
-
 import React, { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Palette, Image, Link, Mail, MapPin, Phone, User, ArrowRight, ArrowLeft, Check } from "lucide-react";
+import { Palette, Mail, MapPin, Phone, User, ArrowRight, ArrowLeft, Check } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent } from "@/components/ui/card";
+import LogoUploader from "./LogoUploader";
 
 const SignatureForm = ({ 
   signatureData, 
@@ -32,6 +32,10 @@ const SignatureForm = ({
   ) => {
     const { name, value } = e.target;
     setSignatureData((prev: any) => ({ ...prev, [name]: value }));
+  };
+
+  const handleLogoChange = (logoUrl: string) => {
+    setSignatureData((prev: any) => ({ ...prev, logoUrl }));
   };
 
   const handleColorChange = (name: string, value: string) => {
@@ -441,16 +445,13 @@ const SignatureForm = ({
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="website">Website</Label>
-                  <div className="flex items-center gap-2">
-                    <Link className="h-4 w-4 text-gray-500" />
-                    <Input
-                      id="website"
-                      name="website"
-                      value={signatureData.website}
-                      onChange={handleInputChange}
-                      placeholder="https://www.example.com"
-                    />
-                  </div>
+                  <Input
+                    id="website"
+                    name="website"
+                    value={signatureData.website}
+                    onChange={handleInputChange}
+                    placeholder="https://www.example.com"
+                  />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="address">Address</Label>
@@ -470,20 +471,9 @@ const SignatureForm = ({
 
             <div className="space-y-4">
               <h3 className="text-lg font-medium flex items-center gap-2">
-                <Image className="h-4 w-4" /> Company Logo
+                Company Logo
               </h3>
-              <div className="grid gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="logoUrl">Logo URL</Label>
-                  <Input
-                    id="logoUrl"
-                    name="logoUrl"
-                    value={signatureData.logoUrl}
-                    onChange={handleInputChange}
-                    placeholder="https://example.com/logo.png"
-                  />
-                </div>
-              </div>
+              <LogoUploader logoUrl={signatureData.logoUrl} onLogoChange={handleLogoChange} />
             </div>
           </div>
           
