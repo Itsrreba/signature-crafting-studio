@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { toast } from "@/hooks/use-toast";
@@ -19,7 +18,7 @@ const SignaturePreview = ({ signatureData, layout, template, currentStep = 1 }: 
   const navigate = useNavigate();
 
   const handleCopyHTML = () => {
-    // Check if user is authenticated and at step 3
+    // Check if user is authenticated
     if (!user) {
       toast({
         title: "Authentication Required",
@@ -214,11 +213,9 @@ const SignaturePreview = ({ signatureData, layout, template, currentStep = 1 }: 
             <Download className="mr-2 h-4 w-4" /> Download HTML
           </Button>
           
-          {(!user || (currentStep < 3 && !user.plan)) && (
+          {(!user) && (
             <p className="text-xs text-muted-foreground text-center mt-2">
-              {!user 
-                ? "Sign in to download your signature" 
-                : "Complete all steps to download your signature"}
+              Sign in to download your signature
             </p>
           )}
         </div>

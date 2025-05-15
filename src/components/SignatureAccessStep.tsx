@@ -18,20 +18,7 @@ const SignatureAccessStep = ({ prevStep }: SignatureAccessStepProps) => {
   const [selectedPlan, setSelectedPlan] = useState<"individual" | "team">("individual");
   const { user } = useAuth();
 
-  const handleFreeSignup = () => {
-    if (!user) {
-      toast({
-        description: "Please sign in or create an account to continue.",
-      });
-      navigate("/login");
-      return;
-    }
-    
-    setSelectedPlan("individual");
-    setIsPaymentModalOpen(true);
-  };
-
-  const handlePayment = (plan: "individual" | "team") => {
+  const handlePlanSelection = (plan: "individual" | "team") => {
     if (!user) {
       toast({
         description: "Please sign in or create an account to continue.",
@@ -48,10 +35,7 @@ const SignatureAccessStep = ({ prevStep }: SignatureAccessStepProps) => {
     <>
       <div className="mb-4">
         <h2 className="text-xl font-semibold mb-2">Access Your Signature</h2>
-        <div className="flex items-center text-brand-purple">
-          <Lock className="h-5 w-5 mr-2" />
-          <p>Your signature is ready! Choose a plan to access your signature HTML.</p>
-        </div>
+        <p className="text-brand-purple">Your signature is ready!</p>
       </div>
       
       <div className="space-y-6">
@@ -80,7 +64,7 @@ const SignatureAccessStep = ({ prevStep }: SignatureAccessStepProps) => {
                 <Button 
                   className="w-full mt-4"
                   variant="outline"
-                  onClick={handleFreeSignup}
+                  onClick={() => handlePlanSelection("individual")}
                 >
                   Sign Up for $2
                 </Button>
@@ -114,7 +98,7 @@ const SignatureAccessStep = ({ prevStep }: SignatureAccessStepProps) => {
                 </ul>
                 <Button 
                   className="w-full mt-4 bg-brand-purple hover:bg-brand-purple/90"
-                  onClick={() => handlePayment("team")}
+                  onClick={() => handlePlanSelection("team")}
                 >
                   Upgrade to Team
                 </Button>
