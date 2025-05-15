@@ -1,15 +1,13 @@
-
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import Header from "@/components/Header";
 import SignatureForm from "@/components/SignatureForm";
 import SignaturePreview from "@/components/SignaturePreview";
 import { Button } from "@/components/ui/button";
-import { useToast } from "@/components/ui/use-toast";
+import { toast } from "@/hooks/use-toast";
 import { DollarSign } from "lucide-react";
 
 const Index = () => {
-  const [template, setTemplate] = useState<string>("modern");
   const [layout, setLayout] = useState<string>("standard");
   const [signatureData, setSignatureData] = useState({
     fullName: "John Doe",
@@ -21,6 +19,7 @@ const Index = () => {
     address: "123 Business St, City, Country",
     logoUrl: "https://placehold.co/100x60?text=Logo",
     primaryColor: "#9b87f5",
+    font: "Arial, sans-serif",
   });
 
   return (
@@ -58,15 +57,12 @@ const Index = () => {
           <SignatureForm 
             signatureData={signatureData} 
             setSignatureData={setSignatureData}
-            template={template}
-            setTemplate={setTemplate}
             layout={layout}
             setLayout={setLayout}
           />
           <div className="lg:sticky lg:top-8 self-start">
             <SignaturePreview 
               signatureData={signatureData} 
-              template={template} 
               layout={layout}
             />
           </div>

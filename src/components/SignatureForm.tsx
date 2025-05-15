@@ -2,30 +2,25 @@ import React, { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { useToast } from "@/components/ui/use-toast";
+import { toast } from "@/hooks/use-toast";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Palette, Mail, MapPin, Phone, User, ArrowRight, ArrowLeft, Check } from "lucide-react";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Palette, Mail, MapPin, Phone, User, ArrowRight, ArrowLeft, Font, Check } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import LogoUploader from "./LogoUploader";
+import SignatureAccessStep from "./SignatureAccessStep";
 
 const SignatureForm = ({ 
   signatureData, 
   setSignatureData, 
-  template, 
-  setTemplate,
   layout,
   setLayout
 }: { 
   signatureData: any, 
   setSignatureData: React.Dispatch<React.SetStateAction<any>>,
-  template: string,
-  setTemplate: React.Dispatch<React.SetStateAction<string>>,
   layout: string,
   setLayout: React.Dispatch<React.SetStateAction<string>>
 }) => {
   const [currentStep, setCurrentStep] = useState<number>(1);
-  const { toast } = useToast();
   
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -41,13 +36,17 @@ const SignatureForm = ({
   const handleColorChange = (name: string, value: string) => {
     setSignatureData((prev: any) => ({ ...prev, [name]: value }));
   };
+  
+  const handleFontChange = (font: string) => {
+    setSignatureData((prev: any) => ({ ...prev, font }));
+  };
 
   const nextStep = () => {
-    setCurrentStep(2);
+    setCurrentStep(currentStep + 1);
   };
 
   const prevStep = () => {
-    setCurrentStep(1);
+    setCurrentStep(currentStep - 1);
   };
 
   const LayoutOption = ({ layoutType, title, description, selected }: { layoutType: string, title: string, description: string, selected: boolean }) => (
@@ -223,20 +222,59 @@ const SignatureForm = ({
     </Card>
   );
 
+  const FontOption = ({ font, name, selected }: { font: string, name: string, selected: boolean }) => (
+    <Card 
+      className={`cursor-pointer transition-all ${selected ? 'ring-2 ring-brand-purple' : 'hover:shadow-md'}`}
+      onClick={() => handleFontChange(font)}
+    >
+      <CardContent className="p-4">
+        <div className="relative">
+          {selected && (
+            <div className="absolute -top-2 -right-2 bg-brand-purple text-white rounded-full p-1">
+              <Check size={14} />
+            </div>
+          )}
+          <div className="h-16 flex items-center justify-center">
+            <p style={{ fontFamily: font }} className="text-xl">
+              The quick brown fox jumps over the lazy dog.
+            </p>
+          </div>
+          <p className="text-center mt-2 font-medium text-sm">{name}</p>
+        </div>
+      </CardContent>
+    </Card>
+  );
+
+  // Step indicator component
+  const StepIndicator = () => (
+    <div className="flex items-center mb-6">
+      <div className={`flex items-center justify-center w-8 h-8 rounded-full ${currentStep === 1 ? 'bg-brand-purple text-white' : 'bg-gray-200'}`}>
+        1
+      </div>
+      <div className="flex-1 h-1 mx-2 bg-gray-200">
+        <div 
+          className={`h-full bg-brand-purple`} 
+          style={{width: currentStep === 1 ? '0%' : currentStep === 2 ? '100%' : '100%'}}
+        ></div>
+      </div>
+      <div className={`flex items-center justify-center w-8 h-8 rounded-full ${currentStep === 2 ? 'bg-brand-purple text-white' : 'bg-gray-200'}`}>
+        2
+      </div>
+      <div className="flex-1 h-1 mx-2 bg-gray-200">
+        <div 
+          className={`h-full bg-brand-purple`} 
+          style={{width: currentStep === 3 ? '100%' : '0%'}}
+        ></div>
+      </div>
+      <div className={`flex items-center justify-center w-8 h-8 rounded-full ${currentStep === 3 ? 'bg-brand-purple text-white' : 'bg-gray-200'}`}>
+        3
+      </div>
+    </div>
+  );
+
   return (
     <div className="space-y-6 p-6 bg-white rounded-md shadow-sm border">
-      {/* Step indicator */}
-      <div className="flex items-center mb-6">
-        <div className={`flex items-center justify-center w-8 h-8 rounded-full ${currentStep === 1 ? 'bg-brand-purple text-white' : 'bg-gray-200'}`}>
-          1
-        </div>
-        <div className="flex-1 h-1 mx-2 bg-gray-200">
-          <div className={`h-full ${currentStep === 2 ? 'bg-brand-purple' : 'bg-gray-200'}`} style={{width: currentStep === 1 ? '0%' : '100%'}}></div>
-        </div>
-        <div className={`flex items-center justify-center w-8 h-8 rounded-full ${currentStep === 2 ? 'bg-brand-purple text-white' : 'bg-gray-200'}`}>
-          2
-        </div>
-      </div>
+      <StepIndicator />
       
       {currentStep === 1 && (
         <>
@@ -246,21 +284,43 @@ const SignatureForm = ({
           </div>
           
           <div className="space-y-6">
-            {/* Template selection */}
+            {/* Font selection */}
             <div className="space-y-3">
-              <Label htmlFor="template">Template Style</Label>
-              <Select value={template} onValueChange={setTemplate}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select template" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="modern">Modern</SelectItem>
-                  <SelectItem value="classic">Classic</SelectItem>
-                  <SelectItem value="minimal">Minimal</SelectItem>
-                  <SelectItem value="creative">Creative</SelectItem>
-                  <SelectItem value="professional">Professional</SelectItem>
-                </SelectContent>
-              </Select>
+              <Label className="flex items-center gap-2">
+                <Font className="h-4 w-4" /> Font Selection
+              </Label>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <FontOption 
+                  font="Arial, sans-serif" 
+                  name="Arial" 
+                  selected={signatureData.font === "Arial, sans-serif"}
+                />
+                <FontOption 
+                  font="'Times New Roman', serif" 
+                  name="Times New Roman" 
+                  selected={signatureData.font === "'Times New Roman', serif"}
+                />
+                <FontOption 
+                  font="Verdana, sans-serif" 
+                  name="Verdana" 
+                  selected={signatureData.font === "Verdana, sans-serif"}
+                />
+                <FontOption 
+                  font="Georgia, serif" 
+                  name="Georgia" 
+                  selected={signatureData.font === "Georgia, serif"}
+                />
+                <FontOption 
+                  font="'Courier New', monospace" 
+                  name="Courier New" 
+                  selected={signatureData.font === "'Courier New', monospace"}
+                />
+                <FontOption 
+                  font="'Trebuchet MS', sans-serif" 
+                  name="Trebuchet MS" 
+                  selected={signatureData.font === "'Trebuchet MS', sans-serif"}
+                />
+              </div>
             </div>
             
             {/* Color picker */}
@@ -482,18 +542,17 @@ const SignatureForm = ({
               <ArrowLeft className="mr-2 h-4 w-4" /> Back
             </Button>
             <Button 
-              onClick={() => {
-                toast({
-                  title: "Information saved!",
-                  description: "Your signature information has been updated.",
-                });
-              }} 
+              onClick={nextStep} 
               className="bg-brand-purple hover:bg-opacity-90"
             >
-              Save Information
+              Continue <ArrowRight className="ml-2 h-4 w-4" />
             </Button>
           </div>
         </>
+      )}
+      
+      {currentStep === 3 && (
+        <SignatureAccessStep prevStep={prevStep} />
       )}
     </div>
   );
