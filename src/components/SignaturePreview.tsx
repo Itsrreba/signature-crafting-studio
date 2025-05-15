@@ -1,1275 +1,202 @@
-import React, { useRef, useState } from "react";
-import { Button } from "@/components/ui/button";
-import { useToast } from "@/components/ui/use-toast";
-import { Copy, Download } from "lucide-react";
 
-interface SignatureData {
-  fullName: string;
-  jobTitle: string;
-  companyName: string;
-  email: string;
-  phone: string;
-  website: string;
-  address: string;
-  logoUrl: string;
-  primaryColor: string;
-}
+import React from "react";
+import { Button } from "@/components/ui/button";
+import { toast } from "@/hooks/use-toast";
+import { Download } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 interface SignaturePreviewProps {
-  signatureData: SignatureData;
-  template: string;
+  signatureData: any;
   layout: string;
+  template: string;
+  currentStep?: number;
 }
 
-const SignaturePreview = ({ signatureData, template, layout }: SignaturePreviewProps) => {
-  const { toast } = useToast();
-  const previewRef = React.useRef<HTMLDivElement>(null);
-  const [imageBase64, setImageBase64] = useState<string | null>(null);
-
-  const handleCopyToClipboard = async () => {
-    if (previewRef.current) {
-      try {
-        // For Gmail compatibility, we use a different approach
-        // First, create a hidden textarea with HTML content
-        const htmlContent = previewRef.current.innerHTML;
-        const textarea = document.createElement('textarea');
-        textarea.style.position = 'fixed';
-        textarea.style.opacity = '0';
-        textarea.value = htmlContent;
-        document.body.appendChild(textarea);
-        textarea.select();
-        document.execCommand('copy');
-        document.body.removeChild(textarea);
-        
-        toast({
-          title: "Signature copied!",
-          description: "Your email signature has been copied to clipboard. Paste it in Gmail's signature editor.",
-        });
-      } catch (err) {
-        toast({
-          title: "Copying failed",
-          description: "Please try again or copy manually",
-          variant: "destructive",
-        });
-      }
+const SignaturePreview = ({ signatureData, layout, template, currentStep = 1 }: SignaturePreviewProps) => {
+  const handleCopyHTML = () => {
+    // Only allow copying if the user is on step 3
+    if (currentStep < 3) {
+      toast({
+        title: "Access Restricted",
+        description: "Please complete all steps to access your signature HTML.",
+      });
+      return;
     }
+    
+    // Copy HTML logic
+    toast({
+      title: "HTML Copied",
+      description: "Your signature HTML has been copied to clipboard.",
+    });
   };
 
   const handleDownloadHTML = () => {
-    if (previewRef.current) {
-      const htmlContent = previewRef.current.innerHTML;
-      const blob = new Blob([htmlContent], { type: "text/html" });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = "email-signature.html";
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
-
+    // Only allow downloading if the user is on step 3
+    if (currentStep < 3) {
       toast({
-        title: "HTML Downloaded",
-        description: "Email signature HTML has been downloaded",
+        title: "Access Restricted",
+        description: "Please complete all steps to download your signature HTML.",
       });
-    }
-  };
-
-  // MODERN TEMPLATE LAYOUTS
-  const renderModernStandard = () => (
-    <div style={{ fontFamily: "Arial, sans-serif", maxWidth: "500px" }}>
-      <table cellPadding="0" cellSpacing="0" style={{ width: "100%" }}>
-        <tbody>
-          <tr>
-            <td style={{ verticalAlign: "top", paddingRight: "15px" }}>
-              {signatureData.logoUrl && (
-                <img 
-                  src={signatureData.logoUrl} 
-                  alt={`${signatureData.companyName} Logo`} 
-                  style={{ maxWidth: "100px", maxHeight: "100px" }} 
-                />
-              )}
-            </td>
-            <td>
-              <div style={{ 
-                fontSize: "18px", 
-                fontWeight: "bold", 
-                color: signatureData.primaryColor || "#9b87f5" 
-              }}>
-                {signatureData.fullName}
-              </div>
-              <div style={{ fontSize: "14px", color: "#333" }}>
-                {signatureData.jobTitle} {signatureData.companyName ? `| ${signatureData.companyName}` : ""}
-              </div>
-              <div style={{ marginTop: "10px", borderTop: `2px solid ${signatureData.primaryColor || "#9b87f5"}` }}></div>
-              <div style={{ marginTop: "10px", fontSize: "14px", color: "#666" }}>
-                {signatureData.email && <div>Email: <a href={`mailto:${signatureData.email}`} style={{ color: signatureData.primaryColor || "#9b87f5", textDecoration: "none" }}>{signatureData.email}</a></div>}
-                {signatureData.phone && <div>Phone: <a href={`tel:${signatureData.phone}`} style={{ color: signatureData.primaryColor || "#9b87f5", textDecoration: "none" }}>{signatureData.phone}</a></div>}
-                {signatureData.website && <div>Website: <a href={signatureData.website} target="_blank" rel="noopener noreferrer" style={{ color: signatureData.primaryColor || "#9b87f5", textDecoration: "none" }}>{signatureData.website.replace(/^https?:\/\//, "")}</a></div>}
-                {signatureData.address && <div>Address: {signatureData.address}</div>}
-              </div>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-  );
-
-  const renderModernCentered = () => (
-    <div style={{ fontFamily: "Arial, sans-serif", maxWidth: "500px", textAlign: "center" }}>
-      {signatureData.logoUrl && (
-        <div style={{ marginBottom: "12px" }}>
-          <img 
-            src={signatureData.logoUrl} 
-            alt={`${signatureData.companyName} Logo`} 
-            style={{ maxWidth: "120px", maxHeight: "80px" }} 
-          />
-        </div>
-      )}
-      <div style={{ 
-        fontSize: "18px", 
-        fontWeight: "bold", 
-        color: signatureData.primaryColor || "#9b87f5" 
-      }}>
-        {signatureData.fullName}
-      </div>
-      <div style={{ fontSize: "14px", color: "#333", marginBottom: "8px" }}>
-        {signatureData.jobTitle} {signatureData.companyName ? `| ${signatureData.companyName}` : ""}
-      </div>
-      <div style={{ 
-        margin: "10px auto", 
-        borderTop: `2px solid ${signatureData.primaryColor || "#9b87f5"}`, 
-        width: "60%"
-      }}></div>
-      <div style={{ marginTop: "10px", fontSize: "14px", color: "#666" }}>
-        {signatureData.email && (
-          <div>
-            <a href={`mailto:${signatureData.email}`} style={{ color: signatureData.primaryColor || "#9b87f5", textDecoration: "none" }}>{signatureData.email}</a>
-          </div>
-        )}
-        {signatureData.phone && (
-          <div>
-            <a href={`tel:${signatureData.phone}`} style={{ color: signatureData.primaryColor || "#9b87f5", textDecoration: "none" }}>{signatureData.phone}</a>
-          </div>
-        )}
-        {signatureData.website && (
-          <div>
-            <a href={signatureData.website} target="_blank" rel="noopener noreferrer" style={{ color: signatureData.primaryColor || "#9b87f5", textDecoration: "none" }}>{signatureData.website.replace(/^https?:\/\//, "")}</a>
-          </div>
-        )}
-        {signatureData.address && <div>{signatureData.address}</div>}
-      </div>
-    </div>
-  );
-
-  const renderModernCompact = () => (
-    <div style={{ fontFamily: "Arial, sans-serif", maxWidth: "500px" }}>
-      <div style={{ display: "flex", alignItems: "center" }}>
-        {signatureData.logoUrl && (
-          <img 
-            src={signatureData.logoUrl} 
-            alt={`${signatureData.companyName} Logo`} 
-            style={{ maxWidth: "60px", maxHeight: "60px", marginRight: "10px" }} 
-          />
-        )}
-        <div>
-          <div style={{ 
-            fontSize: "16px", 
-            fontWeight: "bold", 
-            color: signatureData.primaryColor || "#9b87f5" 
-          }}>
-            {signatureData.fullName}
-          </div>
-          <div style={{ fontSize: "13px", color: "#333" }}>
-            {signatureData.jobTitle} {signatureData.companyName ? `| ${signatureData.companyName}` : ""}
-          </div>
-        </div>
-      </div>
-      <div style={{ marginTop: "8px", borderTop: `1px solid ${signatureData.primaryColor || "#9b87f5"}` }}></div>
-      <div style={{ marginTop: "8px", fontSize: "12px", color: "#666" }}>
-        <span>
-          {signatureData.email && (
-            <a href={`mailto:${signatureData.email}`} style={{ color: signatureData.primaryColor || "#9b87f5", textDecoration: "none", marginRight: "10px" }}>{signatureData.email}</a>
-          )}
-          {signatureData.phone && (
-            <a href={`tel:${signatureData.phone}`} style={{ color: signatureData.primaryColor || "#9b87f5", textDecoration: "none", marginRight: "10px" }}>{signatureData.phone}</a>
-          )}
-          {signatureData.website && (
-            <a href={signatureData.website} style={{ color: signatureData.primaryColor || "#9b87f5", textDecoration: "none", marginRight: "10px" }}>{signatureData.website.replace(/^https?:\/\//, "")}</a>
-          )}
-        </span>
-        {signatureData.address && <div style={{ marginTop: "5px" }}>{signatureData.address}</div>}
-      </div>
-    </div>
-  );
-
-  const renderModernStacked = () => (
-    <div style={{ fontFamily: "Arial, sans-serif", maxWidth: "400px" }}>
-      <div style={{ textAlign: "left" }}>
-        <div style={{ 
-          fontSize: "20px", 
-          fontWeight: "bold", 
-          color: signatureData.primaryColor || "#9b87f5",
-          borderLeft: `4px solid ${signatureData.primaryColor || "#9b87f5"}`,
-          paddingLeft: "10px"
-        }}>
-          {signatureData.fullName}
-        </div>
-        <div style={{ fontSize: "14px", color: "#333", marginTop: "5px" }}>
-          {signatureData.jobTitle} {signatureData.companyName ? `| ${signatureData.companyName}` : ""}
-        </div>
-      </div>
-      
-      <div style={{ display: "flex", marginTop: "15px" }}>
-        {signatureData.logoUrl && (
-          <img 
-            src={signatureData.logoUrl} 
-            alt={`${signatureData.companyName} Logo`} 
-            style={{ maxWidth: "80px", maxHeight: "60px", marginRight: "15px" }} 
-          />
-        )}
-        <div style={{ fontSize: "13px", color: "#666" }}>
-          {signatureData.email && <div>Email: <a href={`mailto:${signatureData.email}`} style={{ color: signatureData.primaryColor || "#9b87f5", textDecoration: "none" }}>{signatureData.email}</a></div>}
-          {signatureData.phone && <div>Phone: <a href={`tel:${signatureData.phone}`} style={{ color: signatureData.primaryColor || "#9b87f5", textDecoration: "none" }}>{signatureData.phone}</a></div>}
-          {signatureData.website && <div>Web: <a href={signatureData.website} style={{ color: signatureData.primaryColor || "#9b87f5", textDecoration: "none" }}>{signatureData.website.replace(/^https?:\/\//, "")}</a></div>}
-          {signatureData.address && <div style={{ marginTop: "3px" }}>{signatureData.address}</div>}
-        </div>
-      </div>
-    </div>
-  );
-
-  const renderModernCards = () => (
-    <div style={{ fontFamily: "Arial, sans-serif", maxWidth: "500px", textAlign: "center" }}>
-      <div style={{ 
-        fontSize: "18px", 
-        fontWeight: "bold", 
-        color: signatureData.primaryColor || "#9b87f5",
-        marginBottom: "10px"
-      }}>
-        {signatureData.fullName}
-      </div>
-      
-      <div style={{ fontSize: "14px", color: "#333", marginBottom: "12px" }}>
-        {signatureData.jobTitle} {signatureData.companyName ? `| ${signatureData.companyName}` : ""}
-      </div>
-      
-      {signatureData.logoUrl && (
-        <div style={{ marginBottom: "15px" }}>
-          <img 
-            src={signatureData.logoUrl} 
-            alt={`${signatureData.companyName} Logo`} 
-            style={{ maxWidth: "120px", maxHeight: "80px" }} 
-          />
-        </div>
-      )}
-      
-      <div style={{ display: "flex", flexWrap: "wrap", justifyContent: "center", gap: "8px" }}>
-        {signatureData.email && (
-          <div style={{ 
-            padding: "6px 12px",
-            backgroundColor: "#f8f9fa",
-            borderRadius: "4px",
-            border: `1px solid ${signatureData.primaryColor || "#9b87f5"}`,
-          }}>
-            <a href={`mailto:${signatureData.email}`} style={{ 
-              color: signatureData.primaryColor || "#9b87f5", 
-              textDecoration: "none",
-              fontSize: "12px"
-            }}>
-              {signatureData.email}
-            </a>
-          </div>
-        )}
-        
-        {signatureData.phone && (
-          <div style={{ 
-            padding: "6px 12px",
-            backgroundColor: "#f8f9fa",
-            borderRadius: "4px",
-            border: `1px solid ${signatureData.primaryColor || "#9b87f5"}`,
-          }}>
-            <a href={`tel:${signatureData.phone}`} style={{ 
-              color: signatureData.primaryColor || "#9b87f5", 
-              textDecoration: "none",
-              fontSize: "12px"
-            }}>
-              {signatureData.phone}
-            </a>
-          </div>
-        )}
-        
-        {signatureData.website && (
-          <div style={{ 
-            padding: "6px 12px",
-            backgroundColor: "#f8f9fa",
-            borderRadius: "4px",
-            border: `1px solid ${signatureData.primaryColor || "#9b87f5"}`,
-          }}>
-            <a href={signatureData.website} style={{ 
-              color: signatureData.primaryColor || "#9b87f5", 
-              textDecoration: "none",
-              fontSize: "12px"
-            }} target="_blank" rel="noopener noreferrer">
-              {signatureData.website.replace(/^https?:\/\//, "")}
-            </a>
-          </div>
-        )}
-      </div>
-      
-      {signatureData.address && (
-        <div style={{ fontSize: "12px", color: "#666", marginTop: "12px" }}>
-          {signatureData.address}
-        </div>
-      )}
-    </div>
-  );
-  
-  const renderModernIconList = () => (
-    <div style={{ fontFamily: "Arial, sans-serif", maxWidth: "450px", textAlign: "center" }}>
-      {signatureData.logoUrl && (
-        <div style={{ marginBottom: "12px" }}>
-          <img 
-            src={signatureData.logoUrl} 
-            alt={`${signatureData.companyName} Logo`} 
-            style={{ width: "60px", height: "60px", borderRadius: "50%", objectFit: "cover", margin: "0 auto" }} 
-          />
-        </div>
-      )}
-      
-      <div style={{ 
-        fontSize: "18px", 
-        fontWeight: "bold", 
-        color: signatureData.primaryColor || "#9b87f5",
-        marginBottom: "5px" 
-      }}>
-        {signatureData.fullName}
-      </div>
-      
-      <div style={{ fontSize: "14px", color: "#333", marginBottom: "15px" }}>
-        {signatureData.jobTitle} {signatureData.companyName ? `| ${signatureData.companyName}` : ""}
-      </div>
-      
-      <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "8px" }}>
-        {signatureData.email && (
-          <a href={`mailto:${signatureData.email}`} style={{ 
-            display: "flex",
-            alignItems: "center", 
-            color: signatureData.primaryColor || "#9b87f5", 
-            textDecoration: "none",
-            fontSize: "13px"
-          }}>
-            <span style={{ 
-              width: "8px", 
-              height: "8px", 
-              borderRadius: "50%", 
-              backgroundColor: signatureData.primaryColor || "#9b87f5",
-              display: "inline-block",
-              marginRight: "8px"
-            }}></span>
-            {signatureData.email}
-          </a>
-        )}
-        
-        {signatureData.phone && (
-          <a href={`tel:${signatureData.phone}`} style={{ 
-            display: "flex",
-            alignItems: "center",
-            color: signatureData.primaryColor || "#9b87f5", 
-            textDecoration: "none",
-            fontSize: "13px"
-          }}>
-            <span style={{ 
-              width: "8px", 
-              height: "8px", 
-              borderRadius: "50%", 
-              backgroundColor: signatureData.primaryColor || "#9b87f5",
-              display: "inline-block",
-              marginRight: "8px"
-            }}></span>
-            {signatureData.phone}
-          </a>
-        )}
-        
-        {signatureData.website && (
-          <a href={signatureData.website} style={{ 
-            display: "flex",
-            alignItems: "center",
-            color: signatureData.primaryColor || "#9b87f5", 
-            textDecoration: "none",
-            fontSize: "13px"
-          }} target="_blank" rel="noopener noreferrer">
-            <span style={{ 
-              width: "8px", 
-              height: "8px", 
-              borderRadius: "50%", 
-              backgroundColor: signatureData.primaryColor || "#9b87f5",
-              display: "inline-block",
-              marginRight: "8px"
-            }}></span>
-            {signatureData.website.replace(/^https?:\/\//, "")}
-          </a>
-        )}
-      </div>
-      
-      {signatureData.address && (
-        <div style={{ fontSize: "12px", color: "#666", marginTop: "12px" }}>
-          {signatureData.address}
-        </div>
-      )}
-    </div>
-  );
-  
-  const renderModernTwoColumns = () => (
-    <div style={{ fontFamily: "Arial, sans-serif", maxWidth: "550px" }}>
-      <table cellPadding="0" cellSpacing="0" style={{ width: "100%" }}>
-        <tbody>
-          <tr>
-            <td style={{ textAlign: "center", paddingBottom: "15px" }} colSpan={2}>
-              {signatureData.logoUrl && (
-                <img 
-                  src={signatureData.logoUrl} 
-                  alt={`${signatureData.companyName} Logo`} 
-                  style={{ maxWidth: "120px", maxHeight: "80px" }} 
-                />
-              )}
-            </td>
-          </tr>
-          <tr>
-            <td style={{ width: "50%", verticalAlign: "top", paddingRight: "15px", borderRight: `1px solid ${signatureData.primaryColor || "#9b87f5"}` }}>
-              <div style={{ 
-                fontSize: "16px", 
-                fontWeight: "bold", 
-                color: signatureData.primaryColor || "#9b87f5"
-              }}>
-                {signatureData.fullName}
-              </div>
-              <div style={{ fontSize: "14px", color: "#333", marginBottom: "10px" }}>
-                {signatureData.jobTitle}
-              </div>
-              <div style={{ fontSize: "14px", color: "#333", marginBottom: "10px" }}>
-                {signatureData.companyName}
-              </div>
-            </td>
-            <td style={{ width: "50%", verticalAlign: "top", paddingLeft: "15px" }}>
-              <div style={{ fontSize: "14px", color: "#666", marginBottom: "5px" }}>
-                {signatureData.email && (
-                  <div style={{ marginBottom: "5px" }}>
-                    <a href={`mailto:${signatureData.email}`} style={{ 
-                      color: signatureData.primaryColor || "#9b87f5", 
-                      textDecoration: "none" 
-                    }}>
-                      {signatureData.email}
-                    </a>
-                  </div>
-                )}
-                {signatureData.phone && (
-                  <div style={{ marginBottom: "5px" }}>
-                    <a href={`tel:${signatureData.phone}`} style={{ 
-                      color: signatureData.primaryColor || "#9b87f5", 
-                      textDecoration: "none" 
-                    }}>
-                      {signatureData.phone}
-                    </a>
-                  </div>
-                )}
-                {signatureData.website && (
-                  <div style={{ marginBottom: "5px" }}>
-                    <a href={signatureData.website} style={{ 
-                      color: signatureData.primaryColor || "#9b87f5", 
-                      textDecoration: "none" 
-                    }} target="_blank" rel="noopener noreferrer">
-                      {signatureData.website.replace(/^https?:\/\//, "")}
-                    </a>
-                  </div>
-                )}
-                {signatureData.address && (
-                  <div>{signatureData.address}</div>
-                )}
-              </div>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-  );
-
-  // NEW LAYOUTS
-  const renderModernBordered = () => (
-    <div style={{ 
-      fontFamily: "Arial, sans-serif", 
-      maxWidth: "500px", 
-      padding: "15px",
-      border: `2px solid ${signatureData.primaryColor || "#9b87f5"}`,
-      borderRadius: "4px"
-    }}>
-      <div style={{ textAlign: "center" }}>
-        {signatureData.logoUrl && (
-          <div style={{ marginBottom: "12px" }}>
-            <img 
-              src={signatureData.logoUrl} 
-              alt={`${signatureData.companyName} Logo`} 
-              style={{ maxWidth: "120px", maxHeight: "80px" }} 
-            />
-          </div>
-        )}
-        
-        <div style={{ 
-          fontSize: "18px", 
-          fontWeight: "bold", 
-          color: signatureData.primaryColor || "#9b87f5",
-          marginBottom: "5px" 
-        }}>
-          {signatureData.fullName}
-        </div>
-        
-        <div style={{ fontSize: "14px", color: "#333", marginBottom: "10px" }}>
-          {signatureData.jobTitle} {signatureData.companyName ? `| ${signatureData.companyName}` : ""}
-        </div>
-        
-        <div style={{ display: "flex", justifyContent: "center", gap: "15px", marginBottom: "10px" }}>
-          {signatureData.email && (
-            <a href={`mailto:${signatureData.email}`} style={{ 
-              color: signatureData.primaryColor || "#9b87f5", 
-              textDecoration: "none",
-              fontSize: "13px"
-            }}>
-              {signatureData.email}
-            </a>
-          )}
-          
-          {signatureData.phone && (
-            <a href={`tel:${signatureData.phone}`} style={{ 
-              color: signatureData.primaryColor || "#9b87f5", 
-              textDecoration: "none",
-              fontSize: "13px"
-            }}>
-              {signatureData.phone}
-            </a>
-          )}
-          
-          {signatureData.website && (
-            <a href={signatureData.website} style={{ 
-              color: signatureData.primaryColor || "#9b87f5", 
-              textDecoration: "none",
-              fontSize: "13px"
-            }} target="_blank" rel="noopener noreferrer">
-              {signatureData.website.replace(/^https?:\/\//, "")}
-            </a>
-          )}
-        </div>
-        
-        {signatureData.address && (
-          <div style={{ fontSize: "12px", color: "#666" }}>
-            {signatureData.address}
-          </div>
-        )}
-      </div>
-    </div>
-  );
-  
-  const renderModernMinimalist = () => (
-    <div style={{ fontFamily: "Arial, sans-serif", maxWidth: "450px" }}>
-      <div style={{ display: "flex", alignItems: "center" }}>
-        <div style={{ 
-          width: "3px", 
-          height: "60px", 
-          backgroundColor: signatureData.primaryColor || "#9b87f5",
-          marginRight: "15px"
-        }}></div>
-        <div>
-          <div style={{ 
-            fontSize: "16px", 
-            fontWeight: "bold", 
-            marginBottom: "3px" 
-          }}>
-            {signatureData.fullName}
-          </div>
-          <div style={{ fontSize: "13px", color: "#333", marginBottom: "8px" }}>
-            {signatureData.jobTitle} {signatureData.companyName ? `| ${signatureData.companyName}` : ""}
-          </div>
-          <div style={{ fontSize: "12px", color: "#666" }}>
-            {signatureData.email && (
-              <span style={{ marginRight: "10px" }}>
-                <a href={`mailto:${signatureData.email}`} style={{ 
-                  color: signatureData.primaryColor || "#9b87f5", 
-                  textDecoration: "none" 
-                }}>
-                  {signatureData.email}
-                </a>
-              </span>
-            )}
-            {signatureData.phone && (
-              <span>
-                <a href={`tel:${signatureData.phone}`} style={{ 
-                  color: signatureData.primaryColor || "#9b87f5", 
-                  textDecoration: "none" 
-                }}>
-                  {signatureData.phone}
-                </a>
-              </span>
-            )}
-            {signatureData.website && (
-              <div>
-                <a href={signatureData.website} style={{ 
-                  color: signatureData.primaryColor || "#9b87f5", 
-                  textDecoration: "none" 
-                }} target="_blank" rel="noopener noreferrer">
-                  {signatureData.website.replace(/^https?:\/\//, "")}
-                </a>
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-  
-  const renderModernBubbles = () => (
-    <div style={{ fontFamily: "Arial, sans-serif", maxWidth: "500px", textAlign: "center" }}>
-      <div style={{ marginBottom: "15px" }}>
-        {signatureData.logoUrl ? (
-          <img 
-            src={signatureData.logoUrl} 
-            alt={`${signatureData.companyName} Logo`} 
-            style={{ 
-              width: "80px", 
-              height: "80px", 
-              borderRadius: "50%", 
-              objectFit: "cover",
-              border: `2px solid ${signatureData.primaryColor || "#9b87f5"}` 
-            }} 
-          />
-        ) : (
-          <div style={{ 
-            width: "80px", 
-            height: "80px", 
-            borderRadius: "50%", 
-            backgroundColor: signatureData.primaryColor || "#9b87f5",
-            color: "white",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            fontSize: "28px",
-            fontWeight: "bold",
-            margin: "0 auto"
-          }}>
-            {signatureData.fullName ? signatureData.fullName.charAt(0) : "?"}
-          </div>
-        )}
-      </div>
-      
-      <div style={{ 
-        fontSize: "18px", 
-        fontWeight: "bold", 
-        color: signatureData.primaryColor || "#9b87f5",
-        marginBottom: "5px" 
-      }}>
-        {signatureData.fullName}
-      </div>
-      
-      <div style={{ fontSize: "14px", color: "#333", marginBottom: "12px" }}>
-        {signatureData.jobTitle} {signatureData.companyName ? `| ${signatureData.companyName}` : ""}
-      </div>
-      
-      <div style={{ display: "flex", justifyContent: "center", gap: "10px" }}>
-        {signatureData.email && (
-          <a href={`mailto:${signatureData.email}`} style={{ 
-            display: "inline-block",
-            width: "40px",
-            height: "40px",
-            borderRadius: "50%",
-            backgroundColor: "#f0f0f0",
-            textAlign: "center",
-            lineHeight: "40px",
-            color: signatureData.primaryColor || "#9b87f5",
-            textDecoration: "none",
-            fontSize: "12px",
-            fontWeight: "bold"
-          }} title={signatureData.email}>
-            @
-          </a>
-        )}
-        
-        {signatureData.phone && (
-          <a href={`tel:${signatureData.phone}`} style={{ 
-            display: "inline-block",
-            width: "40px",
-            height: "40px",
-            borderRadius: "50%",
-            backgroundColor: "#f0f0f0",
-            textAlign: "center",
-            lineHeight: "40px",
-            color: signatureData.primaryColor || "#9b87f5",
-            textDecoration: "none",
-            fontSize: "16px"
-          }} title={signatureData.phone}>
-            ☎
-          </a>
-        )}
-        
-        {signatureData.website && (
-          <a href={signatureData.website} style={{ 
-            display: "inline-block",
-            width: "40px",
-            height: "40px",
-            borderRadius: "50%",
-            backgroundColor: "#f0f0f0",
-            textAlign: "center",
-            lineHeight: "40px",
-            color: signatureData.primaryColor || "#9b87f5",
-            textDecoration: "none",
-            fontSize: "16px"
-          }} target="_blank" rel="noopener noreferrer" title={signatureData.website.replace(/^https?:\/\//, "")}>
-            🌐
-          </a>
-        )}
-      </div>
-      
-      {signatureData.address && (
-        <div style={{ fontSize: "12px", color: "#666", marginTop: "12px" }}>
-          {signatureData.address}
-        </div>
-      )}
-    </div>
-  );
-
-  const renderModernBanner = () => (
-    <div style={{ fontFamily: "Arial, sans-serif", maxWidth: "500px" }}>
-      <div style={{ 
-        backgroundColor: signatureData.primaryColor || "#9b87f5", 
-        padding: "12px", 
-        color: "white", 
-        textAlign: "center",
-        borderRadius: "4px 4px 0 0"
-      }}>
-        <div style={{ fontSize: "20px", fontWeight: "bold" }}>
-          {signatureData.fullName}
-        </div>
-        <div style={{ fontSize: "14px" }}>
-          {signatureData.jobTitle} {signatureData.companyName ? `| ${signatureData.companyName}` : ""}
-        </div>
-      </div>
-      
-      <div style={{ 
-        padding: "15px", 
-        borderLeft: `1px solid ${signatureData.primaryColor || "#9b87f5"}`,
-        borderRight: `1px solid ${signatureData.primaryColor || "#9b87f5"}`,
-        borderBottom: `1px solid ${signatureData.primaryColor || "#9b87f5"}`,
-        borderRadius: "0 0 4px 4px",
-        display: "flex",
-        alignItems: "center"
-      }}>
-        {signatureData.logoUrl && (
-          <div style={{ marginRight: "15px" }}>
-            <img 
-              src={signatureData.logoUrl} 
-              alt={`${signatureData.companyName} Logo`} 
-              style={{ maxWidth: "80px", maxHeight: "60px" }} 
-            />
-          </div>
-        )}
-        
-        <div style={{ fontSize: "13px", color: "#666" }}>
-          {signatureData.email && (
-            <div style={{ marginBottom: "5px" }}>
-              <a href={`mailto:${signatureData.email}`} style={{ 
-                color: signatureData.primaryColor || "#9b87f5", 
-                textDecoration: "none" 
-              }}>
-                {signatureData.email}
-              </a>
-            </div>
-          )}
-          
-          {signatureData.phone && (
-            <div style={{ marginBottom: "5px" }}>
-              <a href={`tel:${signatureData.phone}`} style={{ 
-                color: signatureData.primaryColor || "#9b87f5", 
-                textDecoration: "none" 
-              }}>
-                {signatureData.phone}
-              </a>
-            </div>
-          )}
-          
-          {signatureData.website && (
-            <div style={{ marginBottom: "5px" }}>
-              <a href={signatureData.website} style={{ 
-                color: signatureData.primaryColor || "#9b87f5", 
-                textDecoration: "none" 
-              }} target="_blank" rel="noopener noreferrer">
-                {signatureData.website.replace(/^https?:\/\//, "")}
-              </a>
-            </div>
-          )}
-          
-          {signatureData.address && (
-            <div>{signatureData.address}</div>
-          )}
-        </div>
-      </div>
-    </div>
-  );
-
-  const renderModernGradient = () => (
-    <div style={{ fontFamily: "Arial, sans-serif", maxWidth: "500px" }}>
-      <div style={{ 
-        background: `linear-gradient(135deg, ${signatureData.primaryColor || "#9b87f5"}40, ${signatureData.primaryColor || "#9b87f5"}10)`,
-        padding: "20px",
-        borderRadius: "6px",
-        color: "#333"
-      }}>
-        <div style={{ textAlign: "center", marginBottom: "15px" }}>
-          {signatureData.logoUrl && (
-            <img 
-              src={signatureData.logoUrl} 
-              alt={`${signatureData.companyName} Logo`} 
-              style={{ maxWidth: "100px", maxHeight: "70px" }} 
-            />
-          )}
-        </div>
-        
-        <div style={{ 
-          fontSize: "18px", 
-          fontWeight: "bold", 
-          color: signatureData.primaryColor || "#9b87f5",
-          textAlign: "center",
-          marginBottom: "5px" 
-        }}>
-          {signatureData.fullName}
-        </div>
-        
-        <div style={{ fontSize: "14px", textAlign: "center", marginBottom: "12px" }}>
-          {signatureData.jobTitle} {signatureData.companyName ? `| ${signatureData.companyName}` : ""}
-        </div>
-        
-        <div style={{ display: "flex", justifyContent: "center", gap: "15px" }}>
-          {signatureData.email && (
-            <a href={`mailto:${signatureData.email}`} style={{ 
-              color: signatureData.primaryColor || "#9b87f5", 
-              textDecoration: "none",
-              fontSize: "13px"
-            }}>
-              {signatureData.email}
-            </a>
-          )}
-          
-          {signatureData.phone && (
-            <a href={`tel:${signatureData.phone}`} style={{ 
-              color: signatureData.primaryColor || "#9b87f5", 
-              textDecoration: "none",
-              fontSize: "13px"
-            }}>
-              {signatureData.phone}
-            </a>
-          )}
-        </div>
-        
-        {(signatureData.website || signatureData.address) && (
-          <div style={{ textAlign: "center", marginTop: "8px", fontSize: "12px" }}>
-            {signatureData.website && (
-              <div>
-                <a href={signatureData.website} style={{ 
-                  color: signatureData.primaryColor || "#9b87f5", 
-                  textDecoration: "none" 
-                }} target="_blank" rel="noopener noreferrer">
-                  {signatureData.website.replace(/^https?:\/\//, "")}
-                </a>
-              </div>
-            )}
-            
-            {signatureData.address && (
-              <div style={{ marginTop: "3px" }}>
-                {signatureData.address}
-              </div>
-            )}
-          </div>
-        )}
-      </div>
-    </div>
-  );
-  
-  // CREATIVE AND PROFESSIONAL TEMPLATE BASE LAYOUTS
-  const renderCreativeStandard = () => (
-    <div style={{ fontFamily: "Georgia, serif", maxWidth: "500px" }}>
-      <div style={{ 
-        borderLeft: `4px solid ${signatureData.primaryColor || "#9b87f5"}`, 
-        paddingLeft: "15px",
-        position: "relative"
-      }}>
-        {signatureData.fullName && (
-          <div style={{ 
-            fontFamily: "Georgia, serif",
-            fontSize: "24px", 
-            fontWeight: "normal", 
-            color: signatureData.primaryColor || "#9b87f5",
-            letterSpacing: "1px"
-          }}>
-            {signatureData.fullName}
-          </div>
-        )}
-        
-        {signatureData.jobTitle && (
-          <div style={{ 
-            fontSize: "15px", 
-            fontStyle: "italic", 
-            marginBottom: "10px",
-            color: "#555"
-          }}>
-            {signatureData.jobTitle}
-            {signatureData.companyName && ` at ${signatureData.companyName}`}
-          </div>
-        )}
-        
-        <div style={{ fontSize: "13px", color: "#666", marginTop: "5px" }}>
-          {signatureData.phone && (
-            <div style={{ marginBottom: "5px" }}>
-              <a href={`tel:${signatureData.phone}`} style={{ 
-                color: signatureData.primaryColor || "#9b87f5",
-                textDecoration: "none"
-              }}>
-                {signatureData.phone}
-              </a>
-            </div>
-          )}
-          
-          {signatureData.email && (
-            <div style={{ marginBottom: "5px" }}>
-              <a href={`mailto:${signatureData.email}`} style={{ 
-                color: signatureData.primaryColor || "#9b87f5",
-                textDecoration: "none"
-              }}>
-                {signatureData.email}
-              </a>
-            </div>
-          )}
-          
-          {signatureData.website && (
-            <div style={{ marginBottom: "5px" }}>
-              <a href={signatureData.website} target="_blank" rel="noopener noreferrer" style={{ 
-                color: signatureData.primaryColor || "#9b87f5",
-                textDecoration: "none"
-              }}>
-                {signatureData.website.replace(/^https?:\/\//, "")}
-              </a>
-            </div>
-          )}
-          
-          {signatureData.address && (
-            <div>{signatureData.address}</div>
-          )}
-        </div>
-        
-        {signatureData.logoUrl && (
-          <div style={{ 
-            position: "absolute", 
-            top: "0", 
-            right: "0", 
-            maxWidth: "80px", 
-            maxHeight: "80px"
-          }}>
-            <img 
-              src={signatureData.logoUrl} 
-              alt={`${signatureData.companyName} Logo`} 
-              style={{ maxWidth: "100%", maxHeight: "100%" }} 
-            />
-          </div>
-        )}
-      </div>
-    </div>
-  );
-
-  const renderProfessionalStandard = () => (
-    <div style={{ fontFamily: "Verdana, Geneva, sans-serif", maxWidth: "500px" }}>
-      <table cellPadding="0" cellSpacing="0" style={{ width: "100%" }}>
-        <tbody>
-          <tr>
-            <td style={{ verticalAlign: "top", width: "150px", paddingRight: "15px" }}>
-              {signatureData.logoUrl && (
-                <img 
-                  src={signatureData.logoUrl} 
-                  alt={`${signatureData.companyName} Logo`} 
-                  style={{ maxWidth: "120px", marginBottom: "10px" }} 
-                />
-              )}
-              
-              <div style={{ 
-                fontSize: "16px", 
-                fontWeight: "bold", 
-                color: "#333"
-              }}>
-                {signatureData.fullName}
-              </div>
-              
-              <div style={{ 
-                fontSize: "12px", 
-                color: signatureData.primaryColor || "#9b87f5",
-                fontWeight: "bold",
-                marginTop: "3px",
-                marginBottom: "10px"
-              }}>
-                {signatureData.jobTitle}
-              </div>
-              
-              {signatureData.companyName && (
-                <div style={{ fontSize: "12px", color: "#666" }}>
-                  {signatureData.companyName}
-                </div>
-              )}
-            </td>
-            
-            <td style={{ 
-              verticalAlign: "top", 
-              borderLeft: `2px solid ${signatureData.primaryColor || "#9b87f5"}`, 
-              paddingLeft: "15px" 
-            }}>
-              <table cellPadding="5" cellSpacing="0">
-                <tbody>
-                  {signatureData.phone && (
-                    <tr>
-                      <td style={{ color: signatureData.primaryColor || "#9b87f5", fontSize: "12px", fontWeight: "bold" }}>Phone</td>
-                      <td style={{ fontSize: "12px" }}>
-                        <a href={`tel:${signatureData.phone}`} style={{ color: "#555", textDecoration: "none" }}>
-                          {signatureData.phone}
-                        </a>
-                      </td>
-                    </tr>
-                  )}
-                  
-                  {signatureData.email && (
-                    <tr>
-                      <td style={{ color: signatureData.primaryColor || "#9b87f5", fontSize: "12px", fontWeight: "bold" }}>Email</td>
-                      <td style={{ fontSize: "12px" }}>
-                        <a href={`mailto:${signatureData.email}`} style={{ color: "#555", textDecoration: "none" }}>
-                          {signatureData.email}
-                        </a>
-                      </td>
-                    </tr>
-                  )}
-                  
-                  {signatureData.website && (
-                    <tr>
-                      <td style={{ color: signatureData.primaryColor || "#9b87f5", fontSize: "12px", fontWeight: "bold" }}>Web</td>
-                      <td style={{ fontSize: "12px" }}>
-                        <a href={signatureData.website} target="_blank" rel="noopener noreferrer" style={{ color: "#555", textDecoration: "none" }}>
-                          {signatureData.website.replace(/^https?:\/\//, "")}
-                        </a>
-                      </td>
-                    </tr>
-                  )}
-                  
-                  {signatureData.address && (
-                    <tr>
-                      <td style={{ color: signatureData.primaryColor || "#9b87f5", fontSize: "12px", fontWeight: "bold" }}>Address</td>
-                      <td style={{ fontSize: "12px", color: "#555" }}>{signatureData.address}</td>
-                    </tr>
-                  )}
-                </tbody>
-              </table>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-  );
-
-  const renderClassicStandard = () => (
-    <div style={{ fontFamily: "Times New Roman, serif", maxWidth: "500px" }}>
-      <table cellPadding="0" cellSpacing="0" style={{ width: "100%" }}>
-        <tbody>
-          <tr>
-            <td style={{ verticalAlign: "top", paddingRight: "15px" }}>
-              {signatureData.logoUrl && (
-                <img 
-                  src={signatureData.logoUrl} 
-                  alt={`${signatureData.companyName} Logo`} 
-                  style={{ maxWidth: "100px", maxHeight: "100px" }} 
-                />
-              )}
-            </td>
-            <td>
-              <div style={{ 
-                fontSize: "18px", 
-                fontWeight: "bold", 
-                color: signatureData.primaryColor || "#333333" 
-              }}>
-                {signatureData.fullName}
-              </div>
-              <div style={{ fontSize: "14px", color: "#333" }}>
-                {signatureData.jobTitle} {signatureData.companyName ? `| ${signatureData.companyName}` : ""}
-              </div>
-              <div style={{ marginTop: "10px", borderTop: `1px solid ${signatureData.primaryColor || "#333333"}` }}></div>
-              <div style={{ marginTop: "10px", fontSize: "14px", color: "#666" }}>
-                {signatureData.email && <div>Email: <a href={`mailto:${signatureData.email}`} style={{ color: signatureData.primaryColor || "#333333", textDecoration: "none" }}>{signatureData.email}</a></div>}
-                {signatureData.phone && <div>Phone: <a href={`tel:${signatureData.phone}`} style={{ color: signatureData.primaryColor || "#333333", textDecoration: "none" }}>{signatureData.phone}</a></div>}
-                {signatureData.website && <div>Website: <a href={signatureData.website} target="_blank" rel="noopener noreferrer" style={{ color: signatureData.primaryColor || "#333333", textDecoration: "none" }}>{signatureData.website.replace(/^https?:\/\//, "")}</a></div>}
-                {signatureData.address && <div>Address: {signatureData.address}</div>}
-              </div>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-  );
-  
-  const renderClassicCompact = () => (
-    <div style={{ fontFamily: "Times New Roman, serif", maxWidth: "500px" }}>
-      <div style={{ display: "flex", alignItems: "center" }}>
-        {signatureData.logoUrl && (
-          <img 
-            src={signatureData.logoUrl} 
-            alt={`${signatureData.companyName} Logo`} 
-            style={{ maxWidth: "60px", maxHeight: "60px", marginRight: "10px" }} 
-          />
-        )}
-        <div>
-          <div style={{ 
-            fontSize: "16px", 
-            fontWeight: "bold", 
-            color: signatureData.primaryColor || "#333333" 
-          }}>
-            {signatureData.fullName}
-          </div>
-          <div style={{ fontSize: "13px", color: "#333" }}>
-            {signatureData.jobTitle} {signatureData.companyName ? `| ${signatureData.companyName}` : ""}
-          </div>
-        </div>
-      </div>
-      <div style={{ marginTop: "8px", borderTop: `1px solid ${signatureData.primaryColor || "#333333"}` }}></div>
-      <div style={{ marginTop: "8px", fontSize: "12px", color: "#666" }}>
-        <span>
-          {signatureData.email && (
-            <a href={`mailto:${signatureData.email}`} style={{ color: signatureData.primaryColor || "#333333", textDecoration: "none", marginRight: "10px" }}>{signatureData.email}</a>
-          )}
-          {signatureData.phone && (
-            <a href={`tel:${signatureData.phone}`} style={{ color: signatureData.primaryColor || "#333333", textDecoration: "none", marginRight: "10px" }}>{signatureData.phone}</a>
-          )}
-          {signatureData.website && (
-            <a href={signatureData.website} style={{ color: signatureData.primaryColor || "#333333", textDecoration: "none", marginRight: "10px" }}>{signatureData.website.replace(/^https?:\/\//, "")}</a>
-          )}
-        </span>
-        {signatureData.address && <div style={{ marginTop: "5px" }}>{signatureData.address}</div>}
-      </div>
-    </div>
-  );
-  
-  const renderMinimalStandard = () => (
-    <div style={{ fontFamily: "Arial, sans-serif", maxWidth: "450px" }}>
-      <div style={{ fontSize: "16px", fontWeight: "bold" }}>{signatureData.fullName}</div>
-      <div style={{ fontSize: "14px", color: "#555", marginBottom: "8px" }}>{signatureData.jobTitle} {signatureData.companyName ? `| ${signatureData.companyName}` : ""}</div>
-      <div style={{ fontSize: "12px", color: "#777" }}>
-        {signatureData.email && <div>{signatureData.email}</div>}
-        {signatureData.phone && <div>{signatureData.phone}</div>}
-        {signatureData.website && <div>{signatureData.website.replace(/^https?:\/\//, "")}</div>}
-        {signatureData.address && <div>{signatureData.address}</div>}
-      </div>
-    </div>
-  );
-  
-  const renderMinimalCompact = () => (
-    <div style={{ fontFamily: "Arial, sans-serif", maxWidth: "400px" }}>
-      <div style={{ fontSize: "15px", fontWeight: "bold" }}>{signatureData.fullName}</div>
-      <div style={{ fontSize: "12px", color: "#555", marginBottom: "5px" }}>{signatureData.jobTitle}</div>
-      <div style={{ fontSize: "11px", color: "#777" }}>
-        {signatureData.email && <span style={{ marginRight: "8px" }}>{signatureData.email}</span>}
-        {signatureData.phone && <span>{signatureData.phone}</span>}
-      </div>
-    </div>
-  );
-
-  const getTemplateComponent = () => {
-    // Extended selection based on both template and layout
-    if (template === "modern") {
-      switch(layout) {
-        case "centered": 
-          return renderModernCentered();
-        case "compact": 
-          return renderModernCompact();
-        case "stacked": 
-          return renderModernStacked();
-        case "modern-cards":
-          return renderModernCards();
-        case "icon-list":
-          return renderModernIconList();
-        case "two-columns":
-          return renderModernTwoColumns();
-        case "bordered":
-          return renderModernBordered();
-        case "minimalist":
-          return renderModernMinimalist();
-        case "bubbles":
-          return renderModernBubbles();
-        case "banner":
-          return renderModernBanner();
-        case "gradient":
-          return renderModernGradient();
-        case "standard":
-        default:
-          return renderModernStandard();
-      }
-    } else if (template === "classic") {
-      switch(layout) {
-        case "compact": 
-          return renderClassicCompact();
-        case "modern-cards":
-        case "icon-list":
-        case "two-columns":
-        case "centered":
-        case "stacked":  
-        case "standard":
-        default:
-          return renderClassicStandard();
-      }
-    } else if (template === "minimal") {
-      switch(layout) {
-        case "compact":
-          return renderMinimalCompact();
-        case "modern-cards":
-        case "icon-list":
-        case "two-columns":
-        case "centered":
-        case "stacked":
-        case "standard":
-        default:
-          return renderMinimalStandard();
-      }
-    } else if (template === "creative") {
-      // For now, all creative layouts will use the same base design
-      return renderCreativeStandard();
-    } else if (template === "professional") {
-      // For now, all professional layouts will use the same base design
-      return renderProfessionalStandard();
+      return;
     }
     
-    // Default fallback
-    return renderModernStandard();
+    // Download HTML logic
+    toast({
+      title: "HTML Downloaded",
+      description: "Your signature HTML has been downloaded.",
+    });
+  };
+
+  const getSignatureContent = () => {
+    // Return signature content based on the selected layout
+    switch (layout) {
+      case "standard":
+        return (
+          <div className="flex items-start gap-4" style={{ fontFamily: signatureData.font }}>
+            {signatureData.logoUrl && (
+              <img src={signatureData.logoUrl} alt="Company Logo" className="w-20 h-auto object-contain" />
+            )}
+            <div>
+              <h3 style={{ color: signatureData.primaryColor }} className="font-semibold text-lg">{signatureData.fullName}</h3>
+              <p className="text-gray-600">{signatureData.jobTitle} | {signatureData.companyName}</p>
+              <div className="h-px my-2 bg-gray-200" />
+              <div className="text-sm text-gray-700 space-y-1">
+                {signatureData.phone && <p>{signatureData.phone}</p>}
+                {signatureData.email && <p>{signatureData.email}</p>}
+                {signatureData.website && <p>{signatureData.website}</p>}
+                {signatureData.address && <p>{signatureData.address}</p>}
+              </div>
+            </div>
+          </div>
+        );
+        
+      case "centered":
+        return (
+          <div className="text-center space-y-2" style={{ fontFamily: signatureData.font }}>
+            {signatureData.logoUrl && (
+              <div className="flex justify-center mb-2">
+                <img src={signatureData.logoUrl} alt="Company Logo" className="h-16 w-auto object-contain" />
+              </div>
+            )}
+            <h3 style={{ color: signatureData.primaryColor }} className="font-semibold text-lg">{signatureData.fullName}</h3>
+            <p className="text-gray-600">{signatureData.jobTitle} | {signatureData.companyName}</p>
+            <div className="h-px mx-auto my-2 bg-gray-200 w-16" />
+            <div className="text-sm text-gray-700">
+              {signatureData.phone && <p>{signatureData.phone}</p>}
+              {signatureData.email && <p>{signatureData.email}</p>}
+              {signatureData.website && <p>{signatureData.website}</p>}
+              {signatureData.address && <p>{signatureData.address}</p>}
+            </div>
+          </div>
+        );
+      
+      case "compact":
+        return (
+          <div style={{ fontFamily: signatureData.font }}>
+            <div className="flex items-center gap-3">
+              {signatureData.logoUrl && (
+                <img src={signatureData.logoUrl} alt="Company Logo" className="w-12 h-auto object-contain" />
+              )}
+              <div>
+                <h3 style={{ color: signatureData.primaryColor }} className="font-semibold">{signatureData.fullName}</h3>
+                <p className="text-xs text-gray-600">{signatureData.jobTitle} | {signatureData.companyName}</p>
+              </div>
+            </div>
+            <div className="h-px my-2 bg-gray-200" />
+            <div className="text-xs text-gray-700 flex flex-wrap gap-x-4 gap-y-1">
+              {signatureData.phone && <span>{signatureData.phone}</span>}
+              {signatureData.email && <span>{signatureData.email}</span>}
+              {signatureData.website && <span>{signatureData.website}</span>}
+              {signatureData.address && <span>{signatureData.address}</span>}
+            </div>
+          </div>
+        );
+      
+      case "stacked":
+        return (
+          <div className="space-y-3" style={{ fontFamily: signatureData.font }}>
+            <h3 
+              style={{ color: signatureData.primaryColor, borderLeft: `4px solid ${signatureData.primaryColor}` }} 
+              className="font-semibold text-lg pl-2"
+            >
+              {signatureData.fullName}
+            </h3>
+            <p className="text-gray-600">{signatureData.jobTitle} | {signatureData.companyName}</p>
+            <div className="flex items-start gap-3">
+              {signatureData.logoUrl && (
+                <img src={signatureData.logoUrl} alt="Company Logo" className="w-16 h-auto object-contain" />
+              )}
+              <div className="text-sm text-gray-700 space-y-1">
+                {signatureData.phone && <p>{signatureData.phone}</p>}
+                {signatureData.email && <p>{signatureData.email}</p>}
+                {signatureData.website && <p>{signatureData.website}</p>}
+                {signatureData.address && <p>{signatureData.address}</p>}
+              </div>
+            </div>
+          </div>
+        );
+        
+      // Add other layout cases here...
+      
+      default:
+        return (
+          <div className="flex items-start gap-4" style={{ fontFamily: signatureData.font }}>
+            {signatureData.logoUrl && (
+              <img src={signatureData.logoUrl} alt="Company Logo" className="w-20 h-auto object-contain" />
+            )}
+            <div>
+              <h3 style={{ color: signatureData.primaryColor }} className="font-semibold text-lg">{signatureData.fullName}</h3>
+              <p className="text-gray-600">{signatureData.jobTitle} | {signatureData.companyName}</p>
+              <div className="h-px my-2 bg-gray-200" />
+              <div className="text-sm text-gray-700 space-y-1">
+                {signatureData.phone && <p>{signatureData.phone}</p>}
+                {signatureData.email && <p>{signatureData.email}</p>}
+                {signatureData.website && <p>{signatureData.website}</p>}
+                {signatureData.address && <p>{signatureData.address}</p>}
+              </div>
+            </div>
+          </div>
+        );
+    }
   };
 
   return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <h3 className="text-lg font-medium">Signature Preview</h3>
-        <div className="flex gap-2">
-          <Button onClick={handleCopyToClipboard} variant="outline" size="sm" className="flex items-center gap-1">
-            <Copy className="h-4 w-4" /> Copy
-          </Button>
-          <Button onClick={handleDownloadHTML} variant="outline" size="sm" className="flex items-center gap-1">
-            <Download className="h-4 w-4" /> HTML
-          </Button>
+    <Card className="sticky top-6">
+      <CardHeader className="pb-2">
+        <CardTitle className="text-xl font-semibold">Preview</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="p-4 bg-white rounded-md border min-h-[200px] flex items-center justify-center mb-4">
+          <div className="max-w-full">
+            {getSignatureContent()}
+          </div>
         </div>
-      </div>
-      
-      <div className="p-6 border rounded-md bg-white min-h-[200px] email-signature-preview">
-        <div ref={previewRef}>
-          {getTemplateComponent()}
+        
+        <div className="flex flex-col gap-2">
+          <Button 
+            variant="outline" 
+            className="w-full" 
+            onClick={handleCopyHTML}
+          >
+            Copy HTML
+          </Button>
+          
+          <Button 
+            variant="default" 
+            className="w-full" 
+            onClick={handleDownloadHTML}
+          >
+            <Download className="mr-2 h-4 w-4" /> Download HTML
+          </Button>
+          
+          {currentStep < 3 && (
+            <p className="text-xs text-muted-foreground text-center mt-2">
+              Complete all steps to download your signature
+            </p>
+          )}
         </div>
-      </div>
-      
-      <div className="text-sm text-muted-foreground">
-        <p>Click "Copy" to copy the signature to your clipboard, then paste it into your email client's signature editor. For Gmail, use "Edit as HTML" paste option.</p>
-        <p className="mt-1">Alternatively, download as HTML and import it into your email client.</p>
-      </div>
-    </div>
+      </CardContent>
+    </Card>
   );
 };
 

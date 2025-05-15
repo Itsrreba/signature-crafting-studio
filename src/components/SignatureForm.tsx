@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -13,12 +14,14 @@ const SignatureForm = ({
   signatureData, 
   setSignatureData, 
   layout,
-  setLayout
+  setLayout,
+  onStepChange
 }: { 
   signatureData: any, 
   setSignatureData: React.Dispatch<React.SetStateAction<any>>,
   layout: string,
-  setLayout: React.Dispatch<React.SetStateAction<string>>
+  setLayout: React.Dispatch<React.SetStateAction<string>>,
+  onStepChange?: (step: number) => void
 }) => {
   const [currentStep, setCurrentStep] = useState<number>(1);
   
@@ -42,11 +45,15 @@ const SignatureForm = ({
   };
 
   const nextStep = () => {
-    setCurrentStep(currentStep + 1);
+    const newStep = currentStep + 1;
+    setCurrentStep(newStep);
+    if (onStepChange) onStepChange(newStep);
   };
 
   const prevStep = () => {
-    setCurrentStep(currentStep - 1);
+    const newStep = currentStep - 1;
+    setCurrentStep(newStep);
+    if (onStepChange) onStepChange(newStep);
   };
 
   const LayoutOption = ({ layoutType, title, description, selected }: { layoutType: string, title: string, description: string, selected: boolean }) => (
@@ -222,29 +229,6 @@ const SignatureForm = ({
     </Card>
   );
 
-  const FontOption = ({ font, name, selected }: { font: string, name: string, selected: boolean }) => (
-    <Card 
-      className={`cursor-pointer transition-all ${selected ? 'ring-2 ring-brand-purple' : 'hover:shadow-md'}`}
-      onClick={() => handleFontChange(font)}
-    >
-      <CardContent className="p-4">
-        <div className="relative">
-          {selected && (
-            <div className="absolute -top-2 -right-2 bg-brand-purple text-white rounded-full p-1">
-              <Check size={14} />
-            </div>
-          )}
-          <div className="h-16 flex items-center justify-center">
-            <p style={{ fontFamily: font }} className="text-xl">
-              The quick brown fox jumps over the lazy dog.
-            </p>
-          </div>
-          <p className="text-center mt-2 font-medium text-sm">{name}</p>
-        </div>
-      </CardContent>
-    </Card>
-  );
-
   // Step indicator component
   const StepIndicator = () => (
     <div className="flex items-center mb-6">
@@ -284,43 +268,24 @@ const SignatureForm = ({
           </div>
           
           <div className="space-y-6">
-            {/* Font selection */}
+            {/* Font selection - Now using dropdown */}
             <div className="space-y-3">
               <Label className="flex items-center gap-2">
                 <Type className="h-4 w-4" /> Font Selection
               </Label>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <FontOption 
-                  font="Arial, sans-serif" 
-                  name="Arial" 
-                  selected={signatureData.font === "Arial, sans-serif"}
-                />
-                <FontOption 
-                  font="'Times New Roman', serif" 
-                  name="Times New Roman" 
-                  selected={signatureData.font === "'Times New Roman', serif"}
-                />
-                <FontOption 
-                  font="Verdana, sans-serif" 
-                  name="Verdana" 
-                  selected={signatureData.font === "Verdana, sans-serif"}
-                />
-                <FontOption 
-                  font="Georgia, serif" 
-                  name="Georgia" 
-                  selected={signatureData.font === "Georgia, serif"}
-                />
-                <FontOption 
-                  font="'Courier New', monospace" 
-                  name="Courier New" 
-                  selected={signatureData.font === "'Courier New', monospace"}
-                />
-                <FontOption 
-                  font="'Trebuchet MS', sans-serif" 
-                  name="Trebuchet MS" 
-                  selected={signatureData.font === "'Trebuchet MS', sans-serif"}
-                />
-              </div>
+              <Select value={signatureData.font} onValueChange={handleFontChange}>
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Select a font" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Arial, sans-serif">Arial</SelectItem>
+                  <SelectItem value="'Times New Roman', serif">Times New Roman</SelectItem>
+                  <SelectItem value="Verdana, sans-serif">Verdana</SelectItem>
+                  <SelectItem value="Georgia, serif">Georgia</SelectItem>
+                  <SelectItem value="'Courier New', monospace">Courier New</SelectItem>
+                  <SelectItem value="'Trebuchet MS', sans-serif">Trebuchet MS</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
             
             {/* Color picker */}

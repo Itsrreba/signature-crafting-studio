@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import Header from "@/components/Header";
@@ -9,6 +10,7 @@ import { DollarSign } from "lucide-react";
 
 const Index = () => {
   const [layout, setLayout] = useState<string>("standard");
+  const [currentStep, setCurrentStep] = useState<number>(1);
   const [signatureData, setSignatureData] = useState({
     fullName: "John Doe",
     jobTitle: "Marketing Manager",
@@ -21,6 +23,10 @@ const Index = () => {
     primaryColor: "#9b87f5",
     font: "Arial, sans-serif",
   });
+
+  const handleStepChange = (step: number) => {
+    setCurrentStep(step);
+  };
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
@@ -59,12 +65,14 @@ const Index = () => {
             setSignatureData={setSignatureData}
             layout={layout}
             setLayout={setLayout}
+            onStepChange={handleStepChange}
           />
           <div className="lg:sticky lg:top-8 self-start">
             <SignaturePreview 
               signatureData={signatureData} 
               layout={layout}
               template=""
+              currentStep={currentStep}
             />
           </div>
         </div>
