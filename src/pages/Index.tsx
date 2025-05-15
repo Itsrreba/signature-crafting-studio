@@ -64,6 +64,7 @@ const Index = () => {
             <SignaturePreview 
               signatureData={signatureData} 
               layout={layout}
+              template=""
             />
           </div>
         </div>

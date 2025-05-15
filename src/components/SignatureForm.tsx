@@ -4,7 +4,7 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { toast } from "@/hooks/use-toast";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Palette, Mail, MapPin, Phone, User, ArrowRight, ArrowLeft, Font, Check } from "lucide-react";
+import { Palette, Mail, MapPin, Phone, User, ArrowRight, ArrowLeft, Type, Check } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import LogoUploader from "./LogoUploader";
 import SignatureAccessStep from "./SignatureAccessStep";
@@ -287,7 +287,7 @@ const SignatureForm = ({
             {/* Font selection */}
             <div className="space-y-3">
               <Label className="flex items-center gap-2">
-                <Font className="h-4 w-4" /> Font Selection
+                <Type className="h-4 w-4" /> Font Selection
               </Label>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <FontOption 
