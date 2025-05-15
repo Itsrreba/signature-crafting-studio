@@ -1,27 +1,29 @@
 
-import React from "react";
+import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, Lock, Check } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { toast } from "@/hooks/use-toast";
+import { useNavigate } from "react-router-dom";
+import PaymentModal from "@/components/PaymentModal";
 
 type SignatureAccessStepProps = {
   prevStep: () => void;
 };
 
 const SignatureAccessStep = ({ prevStep }: SignatureAccessStepProps) => {
+  const navigate = useNavigate();
+  const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
+  const [selectedPlan, setSelectedPlan] = useState<"individual" | "team">("individual");
+
   const handleFreeSignup = () => {
-    toast({
-      title: "Sign up required",
-      description: "Please create an account to access your signature.",
-    });
+    setSelectedPlan("individual");
+    setIsPaymentModalOpen(true);
   };
 
-  const handlePayment = (plan: string) => {
-    toast({
-      title: "Payment required",
-      description: `Please complete your ${plan} plan payment to access your signature.`,
-    });
+  const handlePayment = (plan: "individual" | "team") => {
+    setSelectedPlan(plan);
+    setIsPaymentModalOpen(true);
   };
 
   return (
@@ -32,21 +34,18 @@ const SignatureAccessStep = ({ prevStep }: SignatureAccessStepProps) => {
       </div>
       
       <div className="space-y-6">
-        <div className="rounded-lg border bg-card p-4 text-center">
-          <Lock className="h-12 w-12 mx-auto text-brand-purple opacity-80 mb-4" />
-          <h3 className="text-lg font-semibold mb-2">Your Signature is Ready!</h3>
-          <p className="text-muted-foreground mb-4">
-            Sign up for free or choose a plan to access your signature HTML and start using it right away.
-          </p>
-        </div>
+        <p className="flex items-center text-brand-purple">
+          <Lock className="h-5 w-5 mr-2" />
+          Your signature is ready! Sign up or choose a plan to access your signature HTML.
+        </p>
         
         <div className="grid gap-4">
           <Card className="overflow-hidden transition-all hover:shadow-md">
             <CardContent className="p-0">
               <div className="p-6">
                 <h3 className="text-lg font-semibold flex items-center">
-                  Free Access
-                  <span className="ml-auto text-sm font-normal text-muted-foreground">$0</span>
+                  Single User
+                  <span className="ml-auto text-sm font-normal text-muted-foreground">$2</span>
                 </h3>
                 <ul className="mt-4 space-y-2 text-sm">
                   <li className="flex items-center">
@@ -67,7 +66,7 @@ const SignatureAccessStep = ({ prevStep }: SignatureAccessStepProps) => {
                   variant="outline"
                   onClick={handleFreeSignup}
                 >
-                  Sign Up for Free
+                  Sign Up for $2
                 </Button>
               </div>
             </CardContent>
@@ -80,8 +79,8 @@ const SignatureAccessStep = ({ prevStep }: SignatureAccessStepProps) => {
               </div>
               <div className="p-6">
                 <h3 className="text-lg font-semibold flex items-center">
-                  Premium
-                  <span className="ml-auto text-sm font-normal text-muted-foreground">$2</span>
+                  Team
+                  <span className="ml-auto text-sm font-normal text-muted-foreground">$10</span>
                 </h3>
                 <ul className="mt-4 space-y-2 text-sm">
                   <li className="flex items-center">
@@ -99,9 +98,9 @@ const SignatureAccessStep = ({ prevStep }: SignatureAccessStepProps) => {
                 </ul>
                 <Button 
                   className="w-full mt-4 bg-brand-purple hover:bg-brand-purple/90"
-                  onClick={() => handlePayment("premium")}
+                  onClick={() => handlePayment("team")}
                 >
-                  Upgrade to Premium
+                  Upgrade to Team
                 </Button>
               </div>
             </CardContent>
@@ -114,6 +113,13 @@ const SignatureAccessStep = ({ prevStep }: SignatureAccessStepProps) => {
           <ArrowLeft className="mr-2 h-4 w-4" /> Back
         </Button>
       </div>
+
+      {/* Payment Modal */}
+      <PaymentModal 
+        isOpen={isPaymentModalOpen}
+        onClose={() => setIsPaymentModalOpen(false)}
+        plan={selectedPlan}
+      />
     </>
   );
 };

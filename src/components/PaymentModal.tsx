@@ -14,7 +14,7 @@ interface PaymentModalProps {
 const PaymentModal = ({ isOpen, onClose, plan }: PaymentModalProps) => {
   const planDetails = {
     individual: {
-      name: "Individual Plan",
+      name: "Single User",
       price: "$2",
       description: "One-time payment for single user access"
     },

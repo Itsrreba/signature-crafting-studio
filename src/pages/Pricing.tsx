@@ -40,7 +40,7 @@ const PricingPage = () => {
           {/* Individual Plan */}
           <Card className="border-2 hover:border-brand-purple hover:shadow-lg transition-all duration-300">
             <CardHeader>
-              <CardTitle className="text-2xl">Individual</CardTitle>
+              <CardTitle className="text-2xl">Single User</CardTitle>
               <CardDescription>Perfect for personal use</CardDescription>
               <div className="mt-4">
                 <span className="text-4xl font-bold">$2</span>
