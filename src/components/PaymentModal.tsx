@@ -1,88 +1,103 @@
 
-import React from "react";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Wallet, Banknote } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useAuth } from "@/contexts/AuthContext";
+import { useNavigate } from "react-router-dom";
 import { toast } from "@/hooks/use-toast";
 
-interface PaymentModalProps {
+type PaymentModalProps = {
   isOpen: boolean;
   onClose: () => void;
   plan: "individual" | "team";
-}
+};
 
 const PaymentModal = ({ isOpen, onClose, plan }: PaymentModalProps) => {
-  const planDetails = {
-    individual: {
-      name: "Single User",
-      price: "$2",
-      description: "One-time payment for single user access"
-    },
-    team: {
-      name: "Team Plan",
-      price: "$10",
-      description: "One-time payment for multiple user access"
-    }
-  };
+  const { user, updateUserPlan } = useAuth();
+  const navigate = useNavigate();
 
-  const handlePaymentSelection = (method: string) => {
-    // In a real implementation, this would redirect to the selected payment provider
-    toast({
-      title: `Processing ${method} payment`,
-      description: `Preparing ${planDetails[plan].name} purchase. You'll receive access instructions via email shortly.`,
-    });
-    
-    // Simulate payment processing
-    setTimeout(() => {
+  const handlePayment = () => {
+    if (!user) {
       toast({
-        title: "Thank you for your purchase!",
-        description: "We've sent instructions to your email on how to access your new plan.",
+        description: "Please sign in or create an account to continue.",
       });
-    }, 2000);
-    
+      onClose();
+      navigate("/login");
+      return;
+    }
+
+    // Process payment (simulated)
+    updateUserPlan(plan);
     onClose();
+    
+    // Navigate to homepage
+    navigate("/");
+    
+    toast({
+      title: "Payment successful!",
+      description: `You now have access to the ${plan === "individual" ? "Single User" : "Team"} plan.`,
+    });
   };
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>Complete Your Purchase</DialogTitle>
+          <DialogTitle>Complete your purchase</DialogTitle>
           <DialogDescription>
-            {planDetails[plan].name} - {planDetails[plan].price}
+            Select your preferred payment method below.
           </DialogDescription>
         </DialogHeader>
-        <div className="py-4">
-          <p className="text-sm text-gray-600 mb-4">{planDetails[plan].description}</p>
-          <div className="space-y-4">
-            <Button
-              onClick={() => handlePaymentSelection("PayPal")}
-              variant="outline"
-              className="w-full justify-start"
-            >
-              <Wallet className="mr-2 h-4 w-4" />
-              Pay with PayPal
-            </Button>
-            <Button
-              onClick={() => handlePaymentSelection("Wise")}
-              variant="outline"
-              className="w-full justify-start"
-            >
-              <Banknote className="mr-2 h-4 w-4" />
-              Pay with Wise
-            </Button>
-            <Button
-              onClick={() => handlePaymentSelection("BankTransfer")}
-              variant="outline"
-              className="w-full justify-start"
-            >
-              <Wallet className="mr-2 h-4 w-4" />
-              Pay with Bank Transfer
-            </Button>
-          </div>
-        </div>
-        <DialogFooter>
-          <Button variant="ghost" onClick={onClose}>
+        
+        <Tabs defaultValue="paypal" className="w-full">
+          <TabsList className="grid w-full grid-cols-3">
+            <TabsTrigger value="paypal">PayPal</TabsTrigger>
+            <TabsTrigger value="wise">Wise</TabsTrigger>
+            <TabsTrigger value="bank">Bank Transfer</TabsTrigger>
+          </TabsList>
+          
+          <TabsContent value="paypal" className="space-y-4 py-4">
+            <p className="text-sm">
+              Click the button below to complete your payment with PayPal.
+            </p>
+            <div className="text-center">
+              <Button onClick={handlePayment} className="w-full">
+                Pay ${plan === "individual" ? "2" : "10"} with PayPal
+              </Button>
+            </div>
+          </TabsContent>
+          
+          <TabsContent value="wise" className="space-y-4 py-4">
+            <p className="text-sm">
+              Click the button below to complete your payment with Wise.
+            </p>
+            <div className="text-center">
+              <Button onClick={handlePayment} className="w-full">
+                Pay ${plan === "individual" ? "2" : "10"} with Wise
+              </Button>
+            </div>
+          </TabsContent>
+          
+          <TabsContent value="bank" className="space-y-4 py-4">
+            <p className="text-sm">
+              Please use the following details to make a bank transfer:
+            </p>
+            <div className="rounded-md bg-muted p-3 text-sm">
+              <p>Bank: Example Bank</p>
+              <p>Account Name: SignatureCraft</p>
+              <p>Account Number: 123456789</p>
+              <p>Reference: SC-{Math.floor(Math.random() * 10000)}</p>
+            </div>
+            <div className="text-center">
+              <Button onClick={handlePayment} className="w-full">
+                I've Completed the Bank Transfer
+              </Button>
+            </div>
+          </TabsContent>
+        </Tabs>
+        
+        <DialogFooter className="sm:justify-start">
+          <Button variant="secondary" onClick={onClose}>
             Cancel
           </Button>
         </DialogFooter>

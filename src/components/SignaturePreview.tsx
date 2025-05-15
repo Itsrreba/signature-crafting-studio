@@ -4,6 +4,8 @@ import { Button } from "@/components/ui/button";
 import { toast } from "@/hooks/use-toast";
 import { Download } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useAuth } from "@/contexts/AuthContext";
+import { useNavigate } from "react-router-dom";
 
 interface SignaturePreviewProps {
   signatureData: any;
@@ -13,9 +15,22 @@ interface SignaturePreviewProps {
 }
 
 const SignaturePreview = ({ signatureData, layout, template, currentStep = 1 }: SignaturePreviewProps) => {
+  const { user } = useAuth();
+  const navigate = useNavigate();
+
   const handleCopyHTML = () => {
-    // Only allow copying if the user is on step 3
-    if (currentStep < 3) {
+    // Check if user is authenticated and at step 3
+    if (!user) {
+      toast({
+        title: "Authentication Required",
+        description: "Please sign in or create an account to access your signature HTML.",
+      });
+      navigate("/login");
+      return;
+    }
+    
+    // Check if user is on step 3 or has a paid plan
+    if (currentStep < 3 && !user.plan) {
       toast({
         title: "Access Restricted",
         description: "Please complete all steps to access your signature HTML.",
@@ -31,8 +46,18 @@ const SignaturePreview = ({ signatureData, layout, template, currentStep = 1 }: 
   };
 
   const handleDownloadHTML = () => {
-    // Only allow downloading if the user is on step 3
-    if (currentStep < 3) {
+    // Check if user is authenticated
+    if (!user) {
+      toast({
+        title: "Authentication Required",
+        description: "Please sign in or create an account to download your signature HTML.",
+      });
+      navigate("/login");
+      return;
+    }
+    
+    // Check if user is on step 3 or has a paid plan
+    if (currentStep < 3 && !user.plan) {
       toast({
         title: "Access Restricted",
         description: "Please complete all steps to download your signature HTML.",
@@ -189,9 +214,11 @@ const SignaturePreview = ({ signatureData, layout, template, currentStep = 1 }: 
             <Download className="mr-2 h-4 w-4" /> Download HTML
           </Button>
           
-          {currentStep < 3 && (
+          {(!user || (currentStep < 3 && !user.plan)) && (
             <p className="text-xs text-muted-foreground text-center mt-2">
-              Complete all steps to download your signature
+              {!user 
+                ? "Sign in to download your signature" 
+                : "Complete all steps to download your signature"}
             </p>
           )}
         </div>

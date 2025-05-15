@@ -1,8 +1,18 @@
 
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
+import { useAuth } from "@/contexts/AuthContext";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { User, LogOut } from "lucide-react";
 
 const Header = () => {
+  const { user, logout } = useAuth();
+
   return (
     <header className="border-b bg-white">
       <div className="container flex h-16 items-center justify-between">
@@ -20,12 +30,31 @@ const Header = () => {
           </nav>
         </div>
         <div className="flex items-center gap-4">
-          <Button variant="outline" className="hidden sm:flex">
-            Log In
-          </Button>
-          <Button className="bg-brand-purple hover:bg-opacity-90">
-            Sign Up for Free
-          </Button>
+          {user ? (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" className="gap-2">
+                  <User className="h-4 w-4" />
+                  <span>{user.name}</span>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem onClick={logout} className="cursor-pointer">
+                  <LogOut className="mr-2 h-4 w-4" />
+                  <span>Log out</span>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          ) : (
+            <>
+              <Button variant="outline" className="hidden sm:flex" asChild>
+                <Link to="/login">Log In</Link>
+              </Button>
+              <Button className="bg-brand-purple hover:bg-opacity-90" asChild>
+                <Link to="/signup">Sign Up</Link>
+              </Button>
+            </>
+          )}
         </div>
       </div>
     </header>
