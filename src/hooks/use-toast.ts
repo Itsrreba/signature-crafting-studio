@@ -6,6 +6,7 @@ type ToastProps = {
   title?: string;
   description?: string;
   action?: React.ReactNode;
+  variant?: "default" | "destructive";
 };
 
 const toast = (props: ToastProps) => {
