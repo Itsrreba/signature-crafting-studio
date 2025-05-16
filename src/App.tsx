@@ -10,7 +10,7 @@ import Pricing from "./pages/Pricing";
 import NotFound from "./pages/NotFound";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
-import Header from "./components/Header";
+// Header is now only included in each page as needed, not globally
 
 const queryClient = new QueryClient();
 
@@ -21,7 +21,6 @@ const App = () => (
         <Toaster />
         <Sonner />
         <BrowserRouter>
-          <Header />
           <Routes>
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<Signup />} />
