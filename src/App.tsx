@@ -10,7 +10,6 @@ import Pricing from "./pages/Pricing";
 import NotFound from "./pages/NotFound";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
-import ProtectedRoute from "./components/ProtectedRoute";
 import Header from "./components/Header";
 
 const queryClient = new QueryClient();
