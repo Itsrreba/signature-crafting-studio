@@ -5,6 +5,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { toast } from "@/hooks/use-toast";
+import { useState } from "react";
+import { createClient } from "@supabase/supabase-js";
 
 type PaymentModalProps = {
   isOpen: boolean;
@@ -15,8 +17,15 @@ type PaymentModalProps = {
 const PaymentModal = ({ isOpen, onClose, plan }: PaymentModalProps) => {
   const { user, updateUserPlan } = useAuth();
   const navigate = useNavigate();
+  const [isProcessing, setIsProcessing] = useState(false);
 
-  const handlePayment = () => {
+  // Initialize Supabase client
+  const supabase = createClient(
+    import.meta.env.VITE_SUPABASE_URL,
+    import.meta.env.VITE_SUPABASE_ANON_KEY
+  );
+
+  const handlePayment = async (paymentMethod: string) => {
     if (!user) {
       toast({
         description: "Please sign in or create an account to continue.",
@@ -26,17 +35,67 @@ const PaymentModal = ({ isOpen, onClose, plan }: PaymentModalProps) => {
       return;
     }
 
-    // Process payment (simulated)
-    updateUserPlan(plan);
-    onClose();
-    
-    // Navigate to homepage
-    navigate("/");
-    
-    toast({
-      title: "Payment successful!",
-      description: `You now have access to the ${plan === "individual" ? "Single User" : "Team"} plan.`,
-    });
+    try {
+      setIsProcessing(true);
+
+      // Get the current URL for redirect purposes
+      const redirectUrl = window.location.origin;
+
+      // Call our process-payment Edge Function
+      const { data, error } = await supabase.functions.invoke("process-payment", {
+        body: { paymentMethod, plan, redirectUrl },
+      });
+
+      if (error) {
+        throw error;
+      }
+
+      if (!data.success) {
+        throw new Error(data.error || "Failed to process payment");
+      }
+
+      // For a real implementation, redirect to the payment provider
+      if (data.paymentUrl) {
+        // Open payment URL in a new window
+        window.open(data.paymentUrl, "_blank");
+        
+        toast({
+          title: "Payment initiated",
+          description: `Please complete your payment with ${paymentMethod === "paypal" ? "PayPal" : "Wise"}.`,
+        });
+        
+        // For demo purposes, we're simulating a successful payment
+        // In a real app, you'd confirm payment via webhook or after redirect back
+        const { data: confirmData, error: confirmError } = await supabase.functions.invoke("confirm-payment", {
+          body: { paymentId: "demo", paymentMethod, plan },
+        });
+
+        if (confirmError || !confirmData?.success) {
+          throw new Error("Failed to confirm payment");
+        }
+
+        // Update local user state
+        updateUserPlan(plan);
+        
+        // Close modal and navigate to homepage
+        onClose();
+        navigate("/");
+        
+        toast({
+          title: "Payment successful!",
+          description: `You now have access to the ${plan === "individual" ? "Single User" : "Team"} plan.`,
+        });
+      }
+    } catch (error) {
+      console.error("Payment error:", error);
+      toast({
+        title: "Payment failed",
+        description: error instanceof Error ? error.message : "An error occurred during payment processing",
+        variant: "destructive",
+      });
+    } finally {
+      setIsProcessing(false);
+    }
   };
 
   return (
@@ -60,8 +119,12 @@ const PaymentModal = ({ isOpen, onClose, plan }: PaymentModalProps) => {
               Click the button below to complete your payment with PayPal.
             </p>
             <div className="text-center">
-              <Button onClick={handlePayment} className="w-full">
-                Pay ${plan === "individual" ? "2" : "10"} with PayPal
+              <Button 
+                onClick={() => handlePayment("paypal")} 
+                className="w-full"
+                disabled={isProcessing}
+              >
+                {isProcessing ? "Processing..." : `Pay $${plan === "individual" ? "2" : "10"} with PayPal`}
               </Button>
             </div>
           </TabsContent>
@@ -71,15 +134,19 @@ const PaymentModal = ({ isOpen, onClose, plan }: PaymentModalProps) => {
               Click the button below to complete your payment with Wise.
             </p>
             <div className="text-center">
-              <Button onClick={handlePayment} className="w-full">
-                Pay ${plan === "individual" ? "2" : "10"} with Wise
+              <Button 
+                onClick={() => handlePayment("wise")} 
+                className="w-full"
+                disabled={isProcessing}
+              >
+                {isProcessing ? "Processing..." : `Pay $${plan === "individual" ? "2" : "10"} with Wise`}
               </Button>
             </div>
           </TabsContent>
         </Tabs>
         
         <DialogFooter className="sm:justify-start">
-          <Button variant="secondary" onClick={onClose}>
+          <Button variant="secondary" onClick={onClose} disabled={isProcessing}>
             Cancel
           </Button>
         </DialogFooter>
