@@ -50,10 +50,9 @@ const PaymentModal = ({ isOpen, onClose, plan }: PaymentModalProps) => {
         </DialogHeader>
         
         <Tabs defaultValue="paypal" className="w-full">
-          <TabsList className="grid w-full grid-cols-3">
+          <TabsList className="grid w-full grid-cols-2">
             <TabsTrigger value="paypal">PayPal</TabsTrigger>
             <TabsTrigger value="wise">Wise</TabsTrigger>
-            <TabsTrigger value="bank">Bank Transfer</TabsTrigger>
           </TabsList>
           
           <TabsContent value="paypal" className="space-y-4 py-4">
@@ -74,23 +73,6 @@ const PaymentModal = ({ isOpen, onClose, plan }: PaymentModalProps) => {
             <div className="text-center">
               <Button onClick={handlePayment} className="w-full">
                 Pay ${plan === "individual" ? "2" : "10"} with Wise
-              </Button>
-            </div>
-          </TabsContent>
-          
-          <TabsContent value="bank" className="space-y-4 py-4">
-            <p className="text-sm">
-              Please use the following details to make a bank transfer:
-            </p>
-            <div className="rounded-md bg-muted p-3 text-sm">
-              <p>Bank: Example Bank</p>
-              <p>Account Name: SignatureCraft</p>
-              <p>Account Number: 123456789</p>
-              <p>Reference: SC-{Math.floor(Math.random() * 10000)}</p>
-            </div>
-            <div className="text-center">
-              <Button onClick={handlePayment} className="w-full">
-                I've Completed the Bank Transfer
               </Button>
             </div>
           </TabsContent>

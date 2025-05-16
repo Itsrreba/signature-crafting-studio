@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import Header from "@/components/Header";
 import { Button } from "@/components/ui/button";
@@ -140,7 +139,7 @@ const PricingPage = () => {
             <p className="text-gray-600 mt-3">We offer flexible payment options to suit your needs</p>
           </div>
           
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-3xl mx-auto">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-3xl mx-auto">
             <div className="p-6 rounded-lg border bg-white shadow-sm text-center">
               <div className="h-16 w-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
                 <Wallet className="h-8 w-8 text-brand-purple" />
@@ -155,14 +154,6 @@ const PricingPage = () => {
               </div>
               <h3 className="text-xl font-semibold mb-2">Wise</h3>
               <p className="text-gray-600">International transfers with low fees</p>
-            </div>
-            
-            <div className="p-6 rounded-lg border bg-white shadow-sm text-center">
-              <div className="h-16 w-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Wallet className="h-8 w-8 text-brand-purple" />
-              </div>
-              <h3 className="text-xl font-semibold mb-2">Bank Transfer</h3>
-              <p className="text-gray-600">Direct transfer to our bank account</p>
             </div>
           </div>
         </div>
