@@ -29,15 +29,26 @@ export const useAuth = () => {
   return context;
 };
 
+// Default mock values for development - these will be used if the .env variables aren't available
+// Using mock values allows the UI to function without a real Supabase connection
+const DEMO_SUPABASE_URL = "https://demo.supabase.co";
+const DEMO_SUPABASE_ANON_KEY = "demo-anon-key";
+
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Initialize Supabase client
-  const supabase = createClient(
-    import.meta.env.VITE_SUPABASE_URL || "",
-    import.meta.env.VITE_SUPABASE_ANON_KEY || ""
-  );
+  // Initialize Supabase client with fallback values if environment variables are not available
+  const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || DEMO_SUPABASE_URL;
+  const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || DEMO_SUPABASE_ANON_KEY;
+  
+  // Initialize Supabase client with guaranteed values
+  const supabase = createClient(supabaseUrl, supabaseAnonKey);
+
+  console.log("Supabase initialization:", { 
+    usingRealCredentials: supabaseUrl !== DEMO_SUPABASE_URL,
+    url: supabaseUrl.substring(0, 10) + '...' // Log only part of the URL for security
+  });
 
   // Load user from Supabase session on initial render
   useEffect(() => {
