@@ -4,7 +4,7 @@ import Header from "@/components/Header";
 import SignatureForm from "@/components/SignatureForm";
 import SignaturePreview from "@/components/SignaturePreview";
 import SignatureSaveButton from "@/components/SignatureSaveButton";
-import { generateSignatureHTML } from "@/utils/signatureHtml";
+import { generateSignatureHTML } from "@/utils/signatureHelper";
 
 const Index = () => {
   const [formData, setFormData] = useState({
