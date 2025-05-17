@@ -8,6 +8,8 @@ import { useAuth } from "@/contexts/AuthContext";
 import SignatureRenderer from "./SignatureRenderer";
 import AuthDialog from "./AuthDialog";
 import PaymentDialog from "./PaymentDialog";
+import SaveSignatureButton from "./SaveSignatureButton";
+import SavedSignaturesList from "./SavedSignaturesList";
 import { generateSignatureHTML } from "../utils/signatureHtml";
 
 interface SignaturePreviewProps {
@@ -109,12 +111,16 @@ const SignaturePreview = ({ signatureData, layout, template, currentStep = 1 }: 
             <Download className="mr-2 h-4 w-4" /> Download HTML
           </Button>
           
+          {user && <SaveSignatureButton signatureData={signatureData} layout={layout} />}
+          
           {(!user) && (
             <p className="text-xs text-muted-foreground text-center mt-2">
               Sign in to download your signature
             </p>
           )}
         </div>
+        
+        <SavedSignaturesList />
       </CardContent>
 
       {/* Dialogs */}
