@@ -24,11 +24,6 @@ const Header = () => {
             <Link to="/" className="text-sm font-medium hover:text-brand-purple transition-colors">
               Home
             </Link>
-            {user && (
-              <Link to="/signatures" className="text-sm font-medium hover:text-brand-purple transition-colors">
-                My Signatures
-              </Link>
-            )}
             <Link to="/pricing" className="text-sm font-medium hover:text-brand-purple transition-colors">
               Pricing
             </Link>
@@ -44,9 +39,6 @@ const Header = () => {
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
-                <DropdownMenuItem asChild className="cursor-pointer">
-                  <Link to="/signatures">My Signatures</Link>
-                </DropdownMenuItem>
                 <DropdownMenuItem onClick={logout} className="cursor-pointer">
                   <LogOut className="mr-2 h-4 w-4" />
                   <span>Log out</span>

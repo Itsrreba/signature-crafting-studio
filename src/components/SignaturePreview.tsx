@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { toast } from "@/hooks/use-toast";
@@ -7,7 +8,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import SignatureRenderer from "./SignatureRenderer";
 import AuthDialog from "./AuthDialog";
 import PaymentDialog from "./PaymentDialog";
-import { generateSignatureHTML } from "../utils/signatureHelper";
+import { generateSignatureHTML } from "../utils/signatureHtml";
 
 interface SignaturePreviewProps {
   signatureData: any;

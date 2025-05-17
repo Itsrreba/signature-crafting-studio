@@ -29,40 +29,18 @@ export const useAuth = () => {
   return context;
 };
 
-// Check for environment variables
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
-
-// If environment variables are not set, warn in development
-if (!supabaseUrl || !supabaseAnonKey) {
-  console.error(
-    "Missing Supabase environment variables. Please check your .env file."
-  );
-}
-
-// Initialize the Supabase client with fallback values for development
-const supabase = createClient(
-  supabaseUrl || "https://placeholder-url.supabase.co", 
-  supabaseAnonKey || "placeholder-key"
-);
-
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
+  // Initialize Supabase client
+  const supabase = createClient(
+    import.meta.env.VITE_SUPABASE_URL || "",
+    import.meta.env.VITE_SUPABASE_ANON_KEY || ""
+  );
+
   // Load user from Supabase session on initial render
   useEffect(() => {
-    // Show warning if environment variables are missing
-    if (!supabaseUrl || !supabaseAnonKey) {
-      toast({
-        title: "Configuration Error",
-        description: "Supabase environment variables are missing. Please check your .env file.",
-        variant: "destructive",
-      });
-      setIsLoading(false);
-      return;
-    }
-
     const loadUser = async () => {
       setIsLoading(true);
       try {
