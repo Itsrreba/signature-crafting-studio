@@ -9,12 +9,14 @@ import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "@/hooks/use-toast";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Loader2 } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 
 const Signup = () => {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const { signup, isLoading } = useAuth();
   const navigate = useNavigate();
 
@@ -40,9 +42,32 @@ const Signup = () => {
     
     if (!validateForm()) return;
     
+    setIsSubmitting(true);
     try {
       console.log("Attempting to create account...");
-      const success = await signup(name, email, password);
+      
+      // First try to use the signup method from AuthContext
+      let success = await signup(name, email, password);
+      
+      // If that fails, try direct Supabase signup as a fallback
+      if (!success) {
+        console.log("Trying direct Supabase signup...");
+        const { data, error } = await supabase.auth.signUp({
+          email,
+          password,
+          options: {
+            data: { name }
+          }
+        });
+        
+        if (error) {
+          throw error;
+        }
+        
+        success = !!data.user;
+        console.log("Direct signup result:", success, data.user);
+      }
+      
       console.log("Signup result:", success);
       
       if (success) {
@@ -55,6 +80,8 @@ const Signup = () => {
     } catch (error) {
       console.error("Signup submission error:", error);
       setErrorMessage(error instanceof Error ? error.message : "Failed to create account. Please try again later.");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -83,7 +110,7 @@ const Signup = () => {
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 required
-                disabled={isLoading}
+                disabled={isLoading || isSubmitting}
               />
             </div>
             <div className="space-y-2">
@@ -95,7 +122,7 @@ const Signup = () => {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
-                disabled={isLoading}
+                disabled={isLoading || isSubmitting}
               />
             </div>
             <div className="space-y-2">
@@ -106,7 +133,7 @@ const Signup = () => {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
-                disabled={isLoading}
+                disabled={isLoading || isSubmitting}
                 placeholder="At least 6 characters"
               />
               <p className="text-xs text-muted-foreground mt-1">
@@ -118,9 +145,9 @@ const Signup = () => {
             <Button 
               type="submit" 
               className="w-full" 
-              disabled={isLoading}
+              disabled={isLoading || isSubmitting}
             >
-              {isLoading ? (
+              {(isLoading || isSubmitting) ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                   Creating account...
