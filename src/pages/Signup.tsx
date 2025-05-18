@@ -6,19 +6,55 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAuth } from "@/contexts/AuthContext";
+import { toast } from "@/hooks/use-toast";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Loader2 } from "lucide-react";
 
 const Signup = () => {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const { signup, isLoading } = useAuth();
   const navigate = useNavigate();
 
+  const validateForm = () => {
+    if (password.length < 6) {
+      setErrorMessage("Password must be at least 6 characters long");
+      return false;
+    }
+    if (!email.includes('@') || !email.includes('.')) {
+      setErrorMessage("Please enter a valid email address");
+      return false;
+    }
+    if (name.trim().length === 0) {
+      setErrorMessage("Please enter your name");
+      return false;
+    }
+    setErrorMessage(null);
+    return true;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const success = await signup(name, email, password);
-    if (success) {
-      navigate("/");
+    
+    if (!validateForm()) return;
+    
+    try {
+      console.log("Attempting to create account...");
+      const success = await signup(name, email, password);
+      console.log("Signup result:", success);
+      
+      if (success) {
+        toast({
+          title: "Account created successfully",
+          description: "Welcome to SignatureCraft! You can now create and save signatures.",
+        });
+        navigate("/");
+      }
+    } catch (error) {
+      console.error("Signup submission error:", error);
+      setErrorMessage(error instanceof Error ? error.message : "Failed to create account. Please try again later.");
     }
   };
 
@@ -33,6 +69,11 @@ const Signup = () => {
         </CardHeader>
         <form onSubmit={handleSubmit}>
           <CardContent className="space-y-4">
+            {errorMessage && (
+              <Alert variant="destructive" className="mb-4">
+                <AlertDescription>{errorMessage}</AlertDescription>
+              </Alert>
+            )}
             <div className="space-y-2">
               <Label htmlFor="name">Name</Label>
               <Input 
@@ -42,6 +83,7 @@ const Signup = () => {
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 required
+                disabled={isLoading}
               />
             </div>
             <div className="space-y-2">
@@ -53,6 +95,7 @@ const Signup = () => {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
+                disabled={isLoading}
               />
             </div>
             <div className="space-y-2">
@@ -63,6 +106,7 @@ const Signup = () => {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
+                disabled={isLoading}
                 placeholder="At least 6 characters"
               />
               <p className="text-xs text-muted-foreground mt-1">
@@ -71,8 +115,19 @@ const Signup = () => {
             </div>
           </CardContent>
           <CardFooter className="flex-col space-y-4">
-            <Button type="submit" className="w-full" disabled={isLoading}>
-              {isLoading ? "Creating account..." : "Create account"}
+            <Button 
+              type="submit" 
+              className="w-full" 
+              disabled={isLoading}
+            >
+              {isLoading ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Creating account...
+                </>
+              ) : (
+                "Create account"
+              )}
             </Button>
             <div className="text-center text-sm">
               Already have an account?{" "}
