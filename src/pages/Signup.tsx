@@ -46,35 +46,27 @@ const Signup = () => {
     try {
       console.log("Attempting to create account...");
       
-      // First try to use the signup method from AuthContext
-      let success = await signup(name, email, password);
-      
-      // If that fails, try direct Supabase signup as a fallback
-      if (!success) {
-        console.log("Trying direct Supabase signup...");
-        const { data, error } = await supabase.auth.signUp({
-          email,
-          password,
-          options: {
-            data: { name }
-          }
-        });
-        
-        if (error) {
-          throw error;
+      // Direct Supabase signup to ensure proper session handling
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: { name }
         }
-        
-        success = !!data.user;
-        console.log("Direct signup result:", success, data.user);
+      });
+      
+      if (error) {
+        throw error;
       }
       
-      console.log("Signup result:", success);
+      console.log("Signup result:", data);
       
-      if (success) {
+      if (data.user) {
         toast({
           title: "Account created successfully",
-          description: "Welcome to SignatureCraft! You can now create and save signatures.",
+          description: "Welcome to SignatureCraft! You are now logged in.",
         });
+        // User is automatically logged in, redirect to home
         navigate("/");
       }
     } catch (error) {

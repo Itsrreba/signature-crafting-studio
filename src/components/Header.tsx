@@ -8,7 +8,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { User, LogOut } from "lucide-react";
+import { User, LogOut, Mail } from "lucide-react";
 
 const Header = () => {
   const { user, logout } = useAuth();
@@ -35,10 +35,14 @@ const Header = () => {
               <DropdownMenuTrigger asChild>
                 <Button variant="outline" className="gap-2">
                   <User className="h-4 w-4" />
-                  <span>{user.name}</span>
+                  <span>{user.name || user.email}</span>
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
+                <DropdownMenuItem className="flex items-center cursor-default">
+                  <Mail className="mr-2 h-4 w-4" />
+                  <span className="text-sm truncate max-w-[200px]">{user.email}</span>
+                </DropdownMenuItem>
                 <DropdownMenuItem onClick={logout} className="cursor-pointer">
                   <LogOut className="mr-2 h-4 w-4" />
                   <span>Log out</span>
