@@ -11,33 +11,37 @@ import NotFound from "./pages/NotFound";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import Dashboard from "./pages/Dashboard";
+import ProtectedRoute from "@/components/ProtectedRoute";
 import { useAuth } from "@/contexts/AuthContext";
-// Header is now only included in each page as needed, not globally
+import Header from "@/components/Header";
 
 const queryClient = new QueryClient();
 
-// Private route component to redirect unauthenticated users
-const PrivateRoute = ({ children }: { children: React.ReactNode }) => {
+// Main routing component separated from App to avoid context issues
+const AppRoutes = () => {
   const { user, isLoading } = useAuth();
   
-  // Show nothing while checking authentication
-  if (isLoading) {
-    return null;
-  }
+  console.log("AppRoutes rendering, user state:", user);
   
-  return user ? <>{children}</> : <Navigate to="/login" />;
-};
-
-const AppRoutes = () => {
   return (
-    <Routes>
-      <Route path="/login" element={<Login />} />
-      <Route path="/signup" element={<Signup />} />
-      <Route path="/pricing" element={<Pricing />} />
-      <Route path="/dashboard" element={<Dashboard />} />
-      <Route path="/" element={<Index />} />
-      <Route path="*" element={<NotFound />} />
-    </Routes>
+    <>
+      <Header />
+      <Routes>
+        <Route path="/login" element={!user ? <Login /> : <Navigate to="/dashboard" />} />
+        <Route path="/signup" element={!user ? <Signup /> : <Navigate to="/dashboard" />} />
+        <Route path="/pricing" element={<Pricing />} />
+        <Route 
+          path="/dashboard" 
+          element={
+            <ProtectedRoute>
+              <Dashboard />
+            </ProtectedRoute>
+          } 
+        />
+        <Route path="/" element={<Index />} />
+        <Route path="*" element={<NotFound />} />
+      </Routes>
+    </>
   );
 };
 
@@ -45,9 +49,9 @@ const App = () => (
   <QueryClientProvider client={queryClient}>
     <AuthProvider>
       <TooltipProvider>
-        <Toaster />
-        <Sonner />
         <BrowserRouter>
+          <Toaster />
+          <Sonner />
           <AppRoutes />
         </BrowserRouter>
       </TooltipProvider>

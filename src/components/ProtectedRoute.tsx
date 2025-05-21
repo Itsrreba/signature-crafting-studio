@@ -2,6 +2,7 @@
 import { Navigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { Loader2 } from "lucide-react";
+import { useEffect } from "react";
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -16,6 +17,10 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
 }) => {
   const { user, isLoading } = useAuth();
   const location = useLocation();
+  
+  useEffect(() => {
+    console.log("ProtectedRoute rendering, user state:", user, "isLoading:", isLoading);
+  }, [user, isLoading]);
 
   if (isLoading) {
     return (

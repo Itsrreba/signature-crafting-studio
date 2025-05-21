@@ -9,11 +9,14 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { User, LogOut, Mail, LayoutDashboard } from "lucide-react";
+import { useEffect } from "react";
 
 const Header = () => {
   const { user, logout } = useAuth();
 
-  console.log("Header rendering, user state:", user); // Added for debugging
+  useEffect(() => {
+    console.log("Header mounted/updated, user state:", user);
+  }, [user]);
 
   return (
     <header className="border-b bg-white">

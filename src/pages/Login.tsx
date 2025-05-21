@@ -5,7 +5,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { useAuth } from "@/contexts/AuthContext";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -16,7 +15,6 @@ const Login = () => {
   const [password, setPassword] = useState("");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const { login, isLoading } = useAuth();
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -25,7 +23,6 @@ const Login = () => {
     setIsSubmitting(true);
     
     try {
-      // Try using the direct Supabase login for consistent session handling
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password
@@ -40,14 +37,7 @@ const Login = () => {
           title: "Login successful",
           description: `Welcome back, ${data.user.user_metadata.name || data.user.email?.split('@')[0] || ""}!`,
         });
-        navigate("/");
-        return;
-      }
-      
-      // Fallback to context login if direct login fails
-      const success = await login(email, password);
-      if (success) {
-        navigate("/");
+        navigate("/dashboard");
       }
     } catch (error) {
       console.error("Login error:", error);
@@ -82,7 +72,7 @@ const Login = () => {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
-                disabled={isLoading || isSubmitting}
+                disabled={isSubmitting}
               />
             </div>
             <div className="space-y-2">
@@ -98,7 +88,7 @@ const Login = () => {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
-                disabled={isLoading || isSubmitting}
+                disabled={isSubmitting}
               />
             </div>
           </CardContent>
@@ -106,9 +96,9 @@ const Login = () => {
             <Button 
               type="submit" 
               className="w-full" 
-              disabled={isLoading || isSubmitting}
+              disabled={isSubmitting}
             >
-              {(isLoading || isSubmitting) ? (
+              {isSubmitting ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                   Signing in...

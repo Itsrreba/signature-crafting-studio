@@ -17,7 +17,6 @@ const Signup = () => {
   const [password, setPassword] = useState("");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const { signup, isLoading } = useAuth();
   const navigate = useNavigate();
 
   const validateForm = () => {
@@ -66,8 +65,8 @@ const Signup = () => {
           title: "Account created successfully",
           description: "Welcome to SignatureCraft! You are now logged in.",
         });
-        // User is automatically logged in, redirect to home
-        navigate("/");
+        // User is automatically logged in, redirect to dashboard
+        navigate("/dashboard");
       }
     } catch (error) {
       console.error("Signup submission error:", error);
@@ -102,7 +101,7 @@ const Signup = () => {
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 required
-                disabled={isLoading || isSubmitting}
+                disabled={isSubmitting}
               />
             </div>
             <div className="space-y-2">
@@ -114,7 +113,7 @@ const Signup = () => {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
-                disabled={isLoading || isSubmitting}
+                disabled={isSubmitting}
               />
             </div>
             <div className="space-y-2">
@@ -125,7 +124,7 @@ const Signup = () => {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
-                disabled={isLoading || isSubmitting}
+                disabled={isSubmitting}
                 placeholder="At least 6 characters"
               />
               <p className="text-xs text-muted-foreground mt-1">
@@ -137,9 +136,9 @@ const Signup = () => {
             <Button 
               type="submit" 
               className="w-full" 
-              disabled={isLoading || isSubmitting}
+              disabled={isSubmitting}
             >
-              {(isLoading || isSubmitting) ? (
+              {isSubmitting ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                   Creating account...
