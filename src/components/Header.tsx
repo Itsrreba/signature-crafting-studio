@@ -13,6 +13,8 @@ import { User, LogOut, Mail, LayoutDashboard } from "lucide-react";
 const Header = () => {
   const { user, logout } = useAuth();
 
+  console.log("Header rendering, user state:", user); // Added for debugging
+
   return (
     <header className="border-b bg-white">
       <div className="container flex h-16 items-center justify-between">

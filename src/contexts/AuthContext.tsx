@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { toast } from "@/hooks/use-toast";
 import { createClient } from "@supabase/supabase-js";
@@ -53,12 +52,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || DEMO_SUPABASE_ANON_KEY;
   
   // Initialize Supabase client with guaranteed values
-  const supabase = createClient(supabaseUrl, supabaseAnonKey);
-
-  console.log("Supabase initialization:", { 
-    usingRealCredentials: supabaseUrl !== DEMO_SUPABASE_URL,
-    url: supabaseUrl.substring(0, 10) + '...' // Log only part of the URL for security
+  const supabase = createClient(supabaseUrl, supabaseAnonKey, {
+    auth: {
+      persistSession: true, 
+      autoRefreshToken: true,
+      detectSessionInUrl: true
+    }
   });
+
+  console.log("AuthProvider initialized with URL:", supabaseUrl.substring(0, 10) + '...'); // For debugging
 
   // Load user from Supabase session on initial render
   useEffect(() => {
@@ -66,6 +68,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setIsLoading(true);
       try {
         const { data: { session } } = await supabase.auth.getSession();
+        
+        console.log("Initial session check:", session ? "Session found" : "No session"); // For debugging
         
         if (session?.user) {
           // Fetch user profile from database
@@ -89,6 +93,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           };
           
           setUser(userObj);
+          console.log("User set from session:", userObj.email); // For debugging
         }
       } catch (error) {
         console.error("Error loading user session:", error);
@@ -101,6 +106,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     // Set up auth state change listener
     const { data: authListener } = supabase.auth.onAuthStateChange(async (event, session) => {
+      console.log("Auth state changed:", event, session ? "Session exists" : "No session"); // For debugging
+      
       if (event === 'SIGNED_IN' && session?.user) {
         // Fetch user profile and set user state
         const { data: profileData } = await supabase
@@ -109,14 +116,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           .eq("id", session.user.id)
           .single();
 
-        setUser({
+        const userObj: User = {
           id: session.user.id,
           email: session.user.email || "",
           name: profileData?.name || session.user.email?.split('@')[0] || "",
           plan: profileData?.plan || null,
-        });
+        };
+        
+        setUser(userObj);
+        console.log("User set after sign in:", userObj.email); // For debugging
       } else if (event === 'SIGNED_OUT') {
         setUser(null);
+        console.log("User signed out"); // For debugging
       }
     });
 
@@ -346,6 +357,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
+  // Simplify login function for debugging
   const login = async (email: string, password: string) => {
     setIsLoading(true);
     try {
@@ -357,6 +369,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       if (error) {
         throw error;
       }
+      
+      console.log("Login success, data:", data?.user?.email); // For debugging
       
       if (data?.user) {
         // Fetch user profile from database
@@ -371,12 +385,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         }
 
         // Set user state
-        setUser({
+        const userObj: User = {
           id: data.user.id,
           email: data.user.email || "",
           name: profileData?.name || data.user.email?.split('@')[0] || "",
           plan: profileData?.plan || null,
-        });
+        };
+        
+        setUser(userObj);
         
         toast({
           title: "Login successful",
