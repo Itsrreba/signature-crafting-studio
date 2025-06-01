@@ -6,10 +6,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAuth } from "@/contexts/AuthContext";
-import { toast } from "@/hooks/use-toast";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Loader2 } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
 
 const Signup = () => {
   const [name, setName] = useState("");
@@ -18,6 +16,7 @@ const Signup = () => {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const navigate = useNavigate();
+  const { signup } = useAuth();
 
   const validateForm = () => {
     if (password.length < 6) {
@@ -43,33 +42,18 @@ const Signup = () => {
     
     setIsSubmitting(true);
     try {
-      console.log("Attempting to create account...");
+      console.log("Signup form submitted for:", email);
       
-      // Direct Supabase signup to ensure proper session handling
-      const { data, error } = await supabase.auth.signUp({
-        email,
-        password,
-        options: {
-          data: { name }
-        }
-      });
+      const success = await signup(name, email, password);
       
-      if (error) {
-        throw error;
-      }
-      
-      console.log("Signup result:", data);
-      
-      if (data.user) {
-        toast({
-          title: "Account created successfully",
-          description: "Welcome to SignatureCraft! You are now logged in.",
-        });
-        // User is automatically logged in, redirect to dashboard
+      if (success) {
+        console.log("Signup successful, navigating to dashboard");
         navigate("/dashboard");
+      } else {
+        setErrorMessage("Failed to create account. Please try again.");
       }
     } catch (error) {
-      console.error("Signup submission error:", error);
+      console.error("Signup form error:", error);
       setErrorMessage(error instanceof Error ? error.message : "Failed to create account. Please try again later.");
     } finally {
       setIsSubmitting(false);

@@ -7,8 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Loader2 } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
-import { toast } from "@/hooks/use-toast";
+import { useAuth } from "@/contexts/AuthContext";
 
 const Login = () => {
   const [email, setEmail] = useState("");
@@ -16,6 +15,7 @@ const Login = () => {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const navigate = useNavigate();
+  const { login } = useAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -23,24 +23,18 @@ const Login = () => {
     setIsSubmitting(true);
     
     try {
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email,
-        password
-      });
+      console.log("Login form submitted for:", email);
       
-      if (error) {
-        throw error;
-      }
+      const success = await login(email, password);
       
-      if (data?.user) {
-        toast({
-          title: "Login successful",
-          description: `Welcome back, ${data.user.user_metadata.name || data.user.email?.split('@')[0] || ""}!`,
-        });
+      if (success) {
+        console.log("Login successful, navigating to dashboard");
         navigate("/dashboard");
+      } else {
+        setErrorMessage("Login failed. Please check your credentials.");
       }
     } catch (error) {
-      console.error("Login error:", error);
+      console.error("Login form error:", error);
       setErrorMessage(error instanceof Error ? error.message : "Login failed. Please check your credentials and try again.");
     } finally {
       setIsSubmitting(false);

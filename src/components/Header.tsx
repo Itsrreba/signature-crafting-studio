@@ -9,14 +9,16 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { User, LogOut, Mail, LayoutDashboard } from "lucide-react";
-import { useEffect } from "react";
 
 const Header = () => {
-  const { user, logout } = useAuth();
+  const { user, logout, isLoading } = useAuth();
 
-  useEffect(() => {
-    console.log("Header mounted/updated, user state:", user);
-  }, [user]);
+  console.log("Header render - user:", user?.email || "No user", "isLoading:", isLoading);
+
+  const handleLogout = async () => {
+    console.log("Header - logout clicked");
+    await logout();
+  };
 
   return (
     <header className="border-b bg-white">
@@ -40,7 +42,7 @@ const Header = () => {
           </nav>
         </div>
         <div className="flex items-center gap-4">
-          {user ? (
+          {!isLoading && user ? (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="outline" className="gap-2">
@@ -59,13 +61,13 @@ const Header = () => {
                     <span>Dashboard</span>
                   </Link>
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={logout} className="cursor-pointer">
+                <DropdownMenuItem onClick={handleLogout} className="cursor-pointer">
                   <LogOut className="mr-2 h-4 w-4" />
                   <span>Log out</span>
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
-          ) : (
+          ) : !isLoading ? (
             <>
               <Button variant="outline" className="hidden sm:flex" asChild>
                 <Link to="/login">Log In</Link>
@@ -74,7 +76,7 @@ const Header = () => {
                 <Link to="/signup">Sign Up</Link>
               </Button>
             </>
-          )}
+          ) : null}
         </div>
       </div>
     </header>
