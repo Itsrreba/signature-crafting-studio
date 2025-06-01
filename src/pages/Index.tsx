@@ -1,7 +1,6 @@
 
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
-import Header from "@/components/Header";
 import SignatureForm from "@/components/SignatureForm";
 import SignaturePreview from "@/components/SignaturePreview";
 import { Button } from "@/components/ui/button";
@@ -30,8 +29,6 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
-      <Header />
-      
       {/* Hero Section */}
       <div className="bg-brand-purple text-white py-16">
         <div className="container">
@@ -210,7 +207,7 @@ const Index = () => {
             </div>
           </div>
         </div>
-      </footer>
+      </div>
     </div>
   );
 };
