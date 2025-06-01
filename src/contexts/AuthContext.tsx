@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { toast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
@@ -70,7 +71,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             id: session.user.id,
             email: session.user.email || "",
             name: profileData?.name || session.user.user_metadata?.name || session.user.email?.split('@')[0] || "",
-            plan: profileData?.plan || null,
+            plan: (profileData?.plan as "free" | "individual" | "team") || "free",
           };
           
           console.log("Setting user:", userObj.email);
@@ -102,7 +103,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             id: session.user.id,
             email: session.user.email || "",
             name: profileData?.name || session.user.user_metadata?.name || session.user.email?.split('@')[0] || "",
-            plan: profileData?.plan || null,
+            plan: (profileData?.plan as "free" | "individual" | "team") || "free",
           };
           
           setUser(userObj);
@@ -240,7 +241,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       // Update local state
       setSavedSignatures((prev) =>
-        prev.map((sig) => (sig.id === id ? { ...sig, name, signatureData, layout, updated_at: new Date().toISOString() } : sig))
+        prev.map((sig) => (sig.id === id ? { ...sig, name, signature_data: signatureData, layout, updated_at: new Date().toISOString() } : sig))
       );
       
       toast({
