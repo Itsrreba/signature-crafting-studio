@@ -7,19 +7,13 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-// This function will handle payment processing for both PayPal and Wise
 serve(async (req) => {
+  console.log("Process payment function called with method:", req.method);
+  
   // Handle CORS preflight requests
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
-
-  // Create Supabase client for user authentication and database updates
-  const supabaseClient = createClient(
-    Deno.env.get("SUPABASE_URL") ?? "",
-    Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "",
-    { auth: { persistSession: false } }
-  );
 
   try {
     const authHeader = req.headers.get("Authorization");
@@ -27,10 +21,17 @@ serve(async (req) => {
       throw new Error("Missing Authorization header");
     }
 
+    // Create Supabase client for user authentication
+    const supabaseClient = createClient(
+      Deno.env.get("SUPABASE_URL") ?? "",
+      Deno.env.get("SUPABASE_ANON_KEY") ?? ""
+    );
+
     const token = authHeader.replace("Bearer ", "");
     const { data: userData, error: authError } = await supabaseClient.auth.getUser(token);
     
     if (authError) {
+      console.error("Authentication error:", authError);
       throw new Error(`Authentication error: ${authError.message}`);
     }
     
@@ -39,34 +40,42 @@ serve(async (req) => {
       throw new Error("User not authenticated");
     }
 
+    console.log("User authenticated:", user.email);
+
     // Get payment data from request
     const { paymentMethod, plan, redirectUrl } = await req.json();
+    
+    console.log("Payment request:", { paymentMethod, plan, redirectUrl });
     
     if (!paymentMethod || !plan) {
       throw new Error("Missing required payment information");
     }
 
-    // In a real implementation, here you would:
-    // 1. For PayPal: Create a PayPal order and return approval URL
-    // 2. For Wise: Create a Wise quote and return payment URL
-
-    // For demo purposes, we're simulating successful payment initiation
+    // For demo purposes, we're creating mock payment URLs
+    // In production, you would integrate with actual PayPal and Wise APIs
     let paymentUrl = "";
     
     if (paymentMethod === "paypal") {
-      // In a real implementation, you would use PayPal SDK to create an order
-      // This is just a placeholder for the demo
+      // Mock PayPal checkout URL - replace with actual PayPal SDK integration
       paymentUrl = `https://www.sandbox.paypal.com/checkoutnow?token=demo_${plan}_${Date.now()}`;
+      console.log("Created PayPal payment URL:", paymentUrl);
     } else if (paymentMethod === "wise") {
-      // In a real implementation, you would use Wise API to create a transfer
-      // This is just a placeholder for the demo
+      // Mock Wise payment URL - replace with actual Wise API integration
       paymentUrl = `https://sandbox.wise.com/transfer/demo_${plan}_${Date.now()}`;
+      console.log("Created Wise payment URL:", paymentUrl);
     } else {
       throw new Error("Unsupported payment method");
     }
 
+    // Create Supabase client with service role for database operations
+    const supabaseService = createClient(
+      Deno.env.get("SUPABASE_URL") ?? "",
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "",
+      { auth: { persistSession: false } }
+    );
+
     // Create a payment record in database
-    const { error: dbError } = await supabaseClient.from("payments").insert({
+    const { error: dbError } = await supabaseService.from("payments").insert({
       user_id: user.id,
       payment_method: paymentMethod,
       plan: plan,
@@ -77,8 +86,12 @@ serve(async (req) => {
 
     if (dbError) {
       console.error("Database error:", dbError);
-      // Continue with the payment process even if DB record creation fails
+      // Continue with payment process even if DB record creation fails
+    } else {
+      console.log("Payment record created successfully");
     }
+
+    console.log("Payment processing successful, returning URL");
 
     return new Response(JSON.stringify({ 
       success: true, 
