@@ -1,5 +1,5 @@
+
 import React, { useState } from "react";
-import Header from "@/components/Header";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Check, Wallet, Banknote } from "lucide-react";
@@ -17,8 +17,6 @@ const PricingPage = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
-      <Header />
-      
       {/* Hero Section */}
       <div className="bg-brand-purple text-white py-16">
         <div className="container">

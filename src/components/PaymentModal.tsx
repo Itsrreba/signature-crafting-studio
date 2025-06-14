@@ -31,24 +31,29 @@ const PaymentModal = ({ isOpen, onClose, plan }: PaymentModalProps) => {
 
     try {
       setIsProcessing(true);
-
-      // For demo purposes, we'll simulate a successful payment
-      // In a production environment, you would call the actual edge function
       
-      // Simulate successful payment after a short delay
-      setTimeout(() => {
-        // Update local user state
-        updateUserPlan(plan);
-        
-        // Close modal and navigate to homepage
-        onClose();
-        navigate("/");
-        
-        toast({
-          title: "Payment successful!",
-          description: `You now have access to the ${plan === "individual" ? "Single User" : "Team"} plan.`,
-        });
-      }, 1500);
+      console.log(`Processing ${paymentMethod} payment for ${plan} plan`);
+      
+      // Call the process-payment edge function
+      const { data, error } = await supabase.functions.invoke('process-payment', {
+        body: {
+          paymentMethod,
+          plan,
+          redirectUrl: window.location.origin
+        }
+      });
+
+      if (error) {
+        throw new Error(error.message);
+      }
+
+      if (data?.success && data?.paymentUrl) {
+        // Redirect to payment provider
+        window.location.href = data.paymentUrl;
+      } else {
+        throw new Error(data?.error || 'Payment initialization failed');
+      }
+      
     } catch (error) {
       console.error("Payment error:", error);
       toast({
@@ -56,7 +61,6 @@ const PaymentModal = ({ isOpen, onClose, plan }: PaymentModalProps) => {
         description: error instanceof Error ? error.message : "An error occurred during payment processing",
         variant: "destructive",
       });
-    } finally {
       setIsProcessing(false);
     }
   };
