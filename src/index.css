@@ -99,3 +99,29 @@
   line-height: 1.5;
   font-size: 14px;
 }
+
+/* Gradient utilities */
+@layer utilities {
+  .bg-gradient-purple {
+    background: linear-gradient(135deg, #9b87f5 0%, #7c3aed 100%);
+  }
+  
+  .bg-gradient-purple-light {
+    background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);
+  }
+  
+  .bg-gradient-brand {
+    background: linear-gradient(135deg, #9b87f5 0%, #8b5cf6 50%, #7c3aed 100%);
+  }
+  
+  .bg-gradient-card {
+    background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+  }
+  
+  .text-gradient {
+    background: linear-gradient(135deg, #9b87f5 0%, #7c3aed 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+}

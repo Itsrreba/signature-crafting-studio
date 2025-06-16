@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import SignatureForm from "@/components/SignatureForm";
@@ -30,8 +29,9 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
       {/* Hero Section */}
-      <div className="bg-brand-purple text-white py-16">
-        <div className="container">
+      <div className="bg-gradient-brand text-white py-16 relative overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-br from-purple-600/20 via-transparent to-blue-600/20"></div>
+        <div className="container relative z-10">
           <div className="max-w-3xl space-y-4">
             <h1 className="text-4xl md:text-5xl font-bold leading-tight">
               Create Professional Email Signatures in Minutes
@@ -40,10 +40,10 @@ const Index = () => {
               Make a lasting impression with custom email signatures that showcase your brand identity.
             </p>
             <div className="pt-4 flex flex-wrap gap-4">
-              <Button size="lg" className="bg-white text-brand-purple hover:bg-gray-100">
+              <Button size="lg" className="bg-white text-brand-purple hover:bg-gray-100 shadow-lg">
                 Start Creating Now
               </Button>
-              <Button asChild size="lg" variant="outline" className="border-white text-white hover:bg-white/10">
+              <Button asChild size="lg" className="bg-white/10 backdrop-blur-sm text-white border-white/30 hover:bg-white/20 shadow-lg">
                 <Link to="/pricing">
                   <DollarSign className="mr-2 h-4 w-4" />
                   View Pricing
@@ -76,19 +76,19 @@ const Index = () => {
       </div>
       
       {/* Features Section */}
-      <div className="bg-white py-16">
+      <div className="bg-gradient-card py-16">
         <div className="container">
-          <h2 className="text-3xl font-bold text-center mb-12">Why Choose Our Signature Creator</h2>
+          <h2 className="text-3xl font-bold text-center mb-12 text-gradient">Why Choose Our Signature Creator</h2>
           <div className="grid md:grid-cols-3 gap-8">
-            <div className="p-6 rounded-lg border bg-white shadow-sm hover:shadow-md transition-shadow">
+            <div className="p-6 rounded-lg border bg-white/80 backdrop-blur-sm shadow-sm hover:shadow-lg transition-all duration-300 hover:-translate-y-1">
               <h3 className="text-xl font-semibold mb-2">Professional Templates</h3>
               <p className="text-gray-600">Choose from a variety of professional templates designed to impress.</p>
             </div>
-            <div className="p-6 rounded-lg border bg-white shadow-sm hover:shadow-md transition-shadow">
+            <div className="p-6 rounded-lg border bg-white/80 backdrop-blur-sm shadow-sm hover:shadow-lg transition-all duration-300 hover:-translate-y-1">
               <h3 className="text-xl font-semibold mb-2">Multiple Layouts</h3>
               <p className="text-gray-600">Customize your signature with different layout options to fit your style.</p>
             </div>
-            <div className="p-6 rounded-lg border bg-white shadow-sm hover:shadow-md transition-shadow">
+            <div className="p-6 rounded-lg border bg-white/80 backdrop-blur-sm shadow-sm hover:shadow-lg transition-all duration-300 hover:-translate-y-1">
               <h3 className="text-xl font-semibold mb-2">Complete Customization</h3>
               <p className="text-gray-600">Customize colors, layout, and styling to match your brand identity.</p>
             </div>
@@ -97,19 +97,19 @@ const Index = () => {
       </div>
       
       {/* Pricing Teaser Section */}
-      <div className="bg-brand-light py-16">
+      <div className="bg-gradient-purple-light py-16">
         <div className="container">
           <div className="text-center mb-10">
-            <h2 className="text-3xl font-bold">Simple, Affordable Pricing</h2>
+            <h2 className="text-3xl font-bold text-gradient">Simple, Affordable Pricing</h2>
             <p className="text-lg text-gray-700 mt-3">Start with our free creator, upgrade when you need more</p>
           </div>
           
           <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
-            <div className="bg-white p-8 rounded-lg shadow-sm border-2 hover:border-brand-purple hover:shadow-lg transition-all duration-300">
+            <div className="bg-white/90 backdrop-blur-sm p-8 rounded-lg shadow-sm border-2 hover:border-brand-purple hover:shadow-lg transition-all duration-300">
               <div className="text-center mb-6">
                 <h3 className="text-xl font-semibold">Individual</h3>
                 <div className="mt-2">
-                  <span className="text-4xl font-bold">$2</span>
+                  <span className="text-4xl font-bold text-gradient">$2</span>
                   <span className="text-gray-500 ml-2">one-time</span>
                 </div>
               </div>
@@ -133,19 +133,19 @@ const Index = () => {
                   <span>Basic support</span>
                 </li>
               </ul>
-              <Button asChild className="w-full bg-brand-purple hover:bg-opacity-90">
+              <Button asChild className="w-full bg-gradient-brand hover:opacity-90 text-white shadow-lg">
                 <Link to="/pricing">Buy Now</Link>
               </Button>
             </div>
             
-            <div className="bg-white p-8 rounded-lg shadow-sm border-2 border-brand-purple relative">
-              <div className="absolute top-0 left-0 right-0 bg-brand-purple text-white text-center py-1 text-sm font-medium">
+            <div className="bg-white/90 backdrop-blur-sm p-8 rounded-lg shadow-sm border-2 border-brand-purple relative overflow-hidden">
+              <div className="absolute top-0 left-0 right-0 bg-gradient-brand text-white text-center py-1 text-sm font-medium">
                 MOST POPULAR
               </div>
               <div className="text-center mb-6 mt-4">
                 <h3 className="text-xl font-semibold">Team</h3>
                 <div className="mt-2">
-                  <span className="text-4xl font-bold">$10</span>
+                  <span className="text-4xl font-bold text-gradient">$10</span>
                   <span className="text-gray-500 ml-2">one-time</span>
                 </div>
               </div>
@@ -169,7 +169,7 @@ const Index = () => {
                   <span>Priority support</span>
                 </li>
               </ul>
-              <Button asChild className="w-full bg-brand-purple hover:bg-opacity-90">
+              <Button asChild className="w-full bg-gradient-brand hover:opacity-90 text-white shadow-lg">
                 <Link to="/pricing">Buy Team Plan</Link>
               </Button>
             </div>
@@ -178,14 +178,14 @@ const Index = () => {
       </div>
       
       {/* CTA Section */}
-      <div className="bg-brand-light py-16">
+      <div className="bg-gradient-purple-light py-16">
         <div className="container text-center">
           <div className="max-w-2xl mx-auto space-y-6">
-            <h2 className="text-3xl font-bold">Ready to create your professional signature?</h2>
+            <h2 className="text-3xl font-bold text-gradient">Ready to create your professional signature?</h2>
             <p className="text-lg text-gray-700">
               Sign up now to save your signatures and access premium templates.
             </p>
-            <Button size="lg" className="bg-brand-purple hover:bg-opacity-90 text-white">
+            <Button size="lg" className="bg-gradient-brand hover:opacity-90 text-white shadow-lg">
               Sign Up for Free
             </Button>
           </div>
@@ -193,17 +193,17 @@ const Index = () => {
       </div>
       
       {/* Footer */}
-      <footer className="bg-brand-dark text-white py-8 mt-auto">
+      <footer className="bg-gradient-to-br from-brand-dark to-gray-900 text-white py-8 mt-auto">
         <div className="container">
           <div className="flex flex-col md:flex-row justify-between items-center">
             <div className="mb-4 md:mb-0">
-              <span className="font-bold text-lg">SignatureCraft</span>
+              <span className="font-bold text-lg text-gradient-purple">SignatureCraft</span>
               <p className="text-sm opacity-70">© 2025 All Rights Reserved</p>
             </div>
             <div className="flex gap-6">
-              <a href="#" className="text-sm hover:underline">Terms</a>
-              <a href="#" className="text-sm hover:underline">Privacy</a>
-              <a href="#" className="text-sm hover:underline">Contact</a>
+              <a href="#" className="text-sm hover:underline hover:text-brand-purple transition-colors">Terms</a>
+              <a href="#" className="text-sm hover:underline hover:text-brand-purple transition-colors">Privacy</a>
+              <a href="#" className="text-sm hover:underline hover:text-brand-purple transition-colors">Contact</a>
             </div>
           </div>
         </div>
