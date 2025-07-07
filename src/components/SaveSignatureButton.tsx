@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
+import { toast } from "@/hooks/use-toast";
 import { Save } from "lucide-react";
 import {
   Dialog,
@@ -28,27 +29,49 @@ const SaveSignatureButton: React.FC<SaveSignatureButtonProps> = ({ signatureData
   const [authDialogOpen, setAuthDialogOpen] = useState(false);
   const [paymentDialogOpen, setPaymentDialogOpen] = useState(false);
 
+  // Check if user can save signatures
+  const canSaveSignatures = () => {
+    if (!user) return false;
+    return user.plan === "individual" || user.plan === "team";
+  };
+
+  const getSignatureLimit = () => {
+    if (user?.plan === "individual") return 1;
+    if (user?.plan === "team") return 10;
+    return 0;
+  };
+
   const handleSaveClick = () => {
+    console.log("Save signature clicked", { user: user?.email, plan: user?.plan });
+    
     if (!user) {
+      console.log("User not authenticated, showing auth dialog");
       setAuthDialogOpen(true);
       return;
     }
 
-    if (!user.plan) {
+    if (!canSaveSignatures()) {
+      console.log("User needs paid plan, showing payment dialog");
       setPaymentDialogOpen(true);
       return;
     }
 
-    const signatureLimit = user.plan === "individual" ? 1 : 10;
+    const signatureLimit = getSignatureLimit();
     if (savedSignatures.length >= signatureLimit) {
       const message = user.plan === "individual" 
         ? "Your Individual plan allows saving 1 signature. Upgrade to Team plan for more."
         : "Your Team plan allows saving up to 10 signatures.";
       
-      alert(message);
+      console.log("Signature limit reached:", { limit: signatureLimit, current: savedSignatures.length });
+      toast({
+        title: "Signature limit reached",
+        description: message,
+        variant: "destructive",
+      });
       return;
     }
 
+    console.log("Opening save dialog");
     setSignatureName(`Signature ${savedSignatures.length + 1}`);
     setIsDialogOpen(true);
   };
@@ -56,8 +79,10 @@ const SaveSignatureButton: React.FC<SaveSignatureButtonProps> = ({ signatureData
   const handleSaveConfirm = async () => {
     if (!signatureName.trim()) return;
     
+    console.log("Saving signature:", signatureName);
     const success = await saveSignature(signatureName, signatureData, layout);
     if (success) {
+      console.log("Signature saved successfully");
       setIsDialogOpen(false);
     }
   };

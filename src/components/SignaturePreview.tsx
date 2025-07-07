@@ -24,62 +24,96 @@ const SignaturePreview = ({ signatureData, layout, template, currentStep = 1 }: 
   const [authDialogOpen, setAuthDialogOpen] = useState(false);
   const [paymentDialogOpen, setPaymentDialogOpen] = useState(false);
 
+  // Check if user can access premium features
+  const canAccessPremiumFeatures = () => {
+    if (!user) return false;
+    return user.plan === "individual" || user.plan === "team";
+  };
+
   const handleCopyHTML = () => {
+    console.log("Copy HTML clicked", { user: user?.email, plan: user?.plan });
+    
     // Check if user is authenticated
     if (!user) {
+      console.log("User not authenticated, showing auth dialog");
       setAuthDialogOpen(true);
       return;
     }
     
-    // Check if user is on step 3 or has a paid plan
-    if (currentStep < 3 && !user.plan) {
+    // Check if user has a paid plan
+    if (!canAccessPremiumFeatures()) {
+      console.log("User needs paid plan, showing payment dialog");
       setPaymentDialogOpen(true);
       return;
     }
     
-    // Generate HTML based on the signature layout
-    const html = generateSignatureHTML(signatureData, layout);
-    navigator.clipboard.writeText(html);
-    
-    toast({
-      title: "HTML Copied",
-      description: "Your signature HTML has been copied to clipboard.",
-    });
+    // Generate and copy HTML
+    try {
+      const html = generateSignatureHTML(signatureData, layout);
+      navigator.clipboard.writeText(html);
+      
+      console.log("HTML copied successfully");
+      toast({
+        title: "HTML Copied",
+        description: "Your signature HTML has been copied to clipboard.",
+      });
+    } catch (error) {
+      console.error("Error copying HTML:", error);
+      toast({
+        title: "Copy Failed",
+        description: "Failed to copy HTML to clipboard.",
+        variant: "destructive",
+      });
+    }
   };
 
   const handleDownloadHTML = () => {
+    console.log("Download HTML clicked", { user: user?.email, plan: user?.plan });
+    
     // Check if user is authenticated
     if (!user) {
+      console.log("User not authenticated, showing auth dialog");
       setAuthDialogOpen(true);
       return;
     }
     
-    // Check if user is on step 3 or has a paid plan
-    if (currentStep < 3 && !user.plan) {
+    // Check if user has a paid plan
+    if (!canAccessPremiumFeatures()) {
+      console.log("User needs paid plan, showing payment dialog");
       setPaymentDialogOpen(true);
       return;
     }
     
-    // Generate HTML for download
-    const html = generateSignatureHTML(signatureData, layout);
-    const blob = new Blob([html], { type: "text/html" });
-    const url = URL.createObjectURL(blob);
-    
-    // Create a temporary anchor to trigger the download
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `signature-${layout}.html`;
-    document.body.appendChild(a);
-    a.click();
-    
-    // Clean up
-    URL.revokeObjectURL(url);
-    document.body.removeChild(a);
-    
-    toast({
-      title: "HTML Downloaded",
-      description: "Your signature HTML has been downloaded.",
-    });
+    // Generate and download HTML
+    try {
+      const html = generateSignatureHTML(signatureData, layout);
+      const blob = new Blob([html], { type: "text/html" });
+      const url = URL.createObjectURL(blob);
+      
+      // Create a temporary anchor to trigger the download
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `signature-${layout}-${Date.now()}.html`;
+      document.body.appendChild(a);
+      a.click();
+      
+      // Clean up
+      URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+      
+      console.log("HTML downloaded successfully");
+      toast({
+        title: "HTML Downloaded",
+        description: "Your signature HTML has been downloaded.",
+      });
+    } catch (error) {
+      console.error("Error downloading HTML:", error);
+      toast({
+        title: "Download Failed",
+        description: "Failed to download HTML file.",
+        variant: "destructive",
+      });
+    }
   };
 
   return (
@@ -113,9 +147,15 @@ const SignaturePreview = ({ signatureData, layout, template, currentStep = 1 }: 
           
           {user && <SaveSignatureButton signatureData={signatureData} layout={layout} />}
           
-          {(!user) && (
+          {!user && (
             <p className="text-xs text-muted-foreground text-center mt-2">
-              Sign in to download your signature
+              Sign in and upgrade to download your signature
+            </p>
+          )}
+          
+          {user && !canAccessPremiumFeatures() && (
+            <p className="text-xs text-muted-foreground text-center mt-2">
+              Upgrade to Individual or Team plan to access HTML features
             </p>
           )}
         </div>
@@ -123,15 +163,16 @@ const SignaturePreview = ({ signatureData, layout, template, currentStep = 1 }: 
         <SavedSignaturesList />
       </CardContent>
 
-      {/* Dialogs */}
+      {/* Authentication Dialog */}
       <AuthDialog 
         open={authDialogOpen} 
         onOpenChange={setAuthDialogOpen}
         title="Authentication Required"
-        description="Please sign in or create an account to access this feature."
+        description="Please sign in or create an account to access HTML download and copy features."
         action="signup"
       />
       
+      {/* Payment Dialog */}
       <PaymentDialog
         open={paymentDialogOpen}
         onOpenChange={setPaymentDialogOpen}
