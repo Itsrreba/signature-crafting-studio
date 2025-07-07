@@ -433,24 +433,37 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const logout = async () => {
-    console.log("Logging out user");
-    
-    const { error } = await supabase.auth.signOut();
-    
-    if (error) {
+    try {
+      console.log("Logging out user");
+      
+      const { error } = await supabase.auth.signOut();
+      
+      if (error) {
+        console.error("Logout error:", error);
+        toast({
+          title: "Logout failed",
+          description: error.message,
+          variant: "destructive",
+        });
+        return;
+      }
+      
+      // Clear local state immediately
+      setUser(null);
+      setSavedSignatures([]);
+      
+      toast({
+        title: "Logged out",
+        description: "You have been logged out successfully.",
+      });
+    } catch (error) {
       console.error("Logout error:", error);
       toast({
         title: "Logout failed",
-        description: error.message,
+        description: "An error occurred while logging out",
         variant: "destructive",
       });
-      return;
     }
-    
-    toast({
-      title: "Logged out",
-      description: "You have been logged out successfully.",
-    });
   };
 
   const updateUserPlan = async (plan: "individual" | "team") => {

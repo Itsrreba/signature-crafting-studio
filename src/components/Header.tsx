@@ -42,12 +42,12 @@ const Header = () => {
           </nav>
         </div>
         <div className="flex items-center gap-4">
-          {!isLoading && user ? (
+          {user ? (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="outline" className="gap-2 hover:bg-gray-50">
+                <Button variant="outline" className="gap-2 hover:bg-gray-50 min-w-[120px]">
                   <User className="h-4 w-4" />
-                  <span className="capitalize hidden sm:inline">{user.name || user.email.split('@')[0]}</span>
+                  <span className="hidden sm:inline">{user.name || user.email?.split('@')[0] || 'User'}</span>
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-56">
@@ -61,25 +61,27 @@ const Header = () => {
                     <span>Dashboard</span>
                   </Link>
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={handleLogout} className="cursor-pointer text-red-600 focus:text-red-600">
+                <DropdownMenuItem onClick={handleLogout} className="cursor-pointer text-red-600 focus:text-red-600 focus:bg-red-50">
                   <LogOut className="mr-2 h-4 w-4" />
                   <span>Log out</span>
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
-          ) : !isLoading ? (
-            <div className="flex items-center gap-3">
-              <Button variant="outline" className="hidden sm:flex hover:bg-gray-50" asChild>
-                <Link to="/login">Log In</Link>
-              </Button>
-              <Button className="bg-brand-purple hover:bg-brand-purple/90 text-white" asChild>
-                <Link to="/signup">Sign Up</Link>
-              </Button>
-            </div>
           ) : (
             <div className="flex items-center gap-3">
-              <div className="w-16 h-9 bg-gray-200 rounded animate-pulse"></div>
-              <div className="w-20 h-9 bg-gray-200 rounded animate-pulse"></div>
+              <Button 
+                variant="outline" 
+                className="border-brand-purple text-brand-purple hover:bg-brand-purple hover:text-white transition-colors" 
+                asChild
+              >
+                <Link to="/login">Sign In</Link>
+              </Button>
+              <Button 
+                className="bg-brand-purple hover:bg-brand-purple/90 text-white px-6" 
+                asChild
+              >
+                <Link to="/signup">Sign Up</Link>
+              </Button>
             </div>
           )}
         </div>
