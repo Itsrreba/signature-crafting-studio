@@ -89,7 +89,7 @@ const Login = () => {
           <CardFooter className="flex-col space-y-4">
             <Button 
               type="submit" 
-              className="w-full" 
+              className="w-full bg-brand-purple hover:bg-brand-purple/90" 
               disabled={isSubmitting}
             >
               {isSubmitting ? (
@@ -97,7 +97,7 @@ const Login = () => {
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                   Signing in...
                 </>
-              ) : "Sign in"}
+              ) : "Sign In"}
             </Button>
             <div className="text-center text-sm">
               Don't have an account?{" "}

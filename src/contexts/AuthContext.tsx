@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { toast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
@@ -44,48 +45,56 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   console.log("AuthProvider - Current user state:", user?.email || "No user");
 
-  // Optimized auth state management
+  // Initialize auth state
   useEffect(() => {
     console.log("AuthProvider - Setting up auth listener");
     
-    // Set up auth state change listener first
+    let mounted = true;
+
+    // Set up auth state change listener
     const { data: authListener } = supabase.auth.onAuthStateChange(async (event, session) => {
       console.log("Auth state changed:", event, session ? `User: ${session.user.email}` : "No session");
       
+      if (!mounted) return;
+
       if (session?.user) {
         await processUser(session.user);
       } else {
         setUser(null);
+        setSavedSignatures([]);
       }
       setIsLoading(false);
     });
 
-    // Then check for existing session
-    const checkSession = async () => {
+    // Check for existing session
+    const initializeAuth = async () => {
       try {
         const { data: { session }, error } = await supabase.auth.getSession();
         
         if (error) {
           console.error("Session check error:", error);
-          setIsLoading(false);
+          if (mounted) setIsLoading(false);
           return;
         }
 
-        if (session?.user) {
-          await processUser(session.user);
-        } else {
-          setUser(null);
+        if (mounted) {
+          if (session?.user) {
+            await processUser(session.user);
+          } else {
+            setUser(null);
+          }
+          setIsLoading(false);
         }
-        setIsLoading(false);
       } catch (error) {
         console.error("Error checking session:", error);
-        setIsLoading(false);
+        if (mounted) setIsLoading(false);
       }
     };
 
-    checkSession();
+    initializeAuth();
 
     return () => {
+      mounted = false;
       console.log("Cleaning up auth listener");
       authListener.subscription.unsubscribe();
     };
@@ -100,39 +109,44 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         .from("profiles")
         .select("*")
         .eq("id", authUser.id)
-        .single();
+        .maybeSingle();
 
-      // Create user object with profile data or defaults
-      const userObj: User = {
-        id: authUser.id,
-        email: authUser.email || "",
-        name: profileData?.name || authUser.user_metadata?.name || authUser.email?.split('@')[0] || "",
-        plan: (profileData?.plan as "free" | "individual" | "team") || "free",
-      };
-      
-      console.log("Setting user:", userObj.email, "with plan:", userObj.plan);
-      setUser(userObj);
+      let userProfile = profileData;
 
       // If profile doesn't exist, create one
-      if (profileError && profileError.code === 'PGRST116') {
+      if (!userProfile) {
         console.log("Creating new profile for user:", authUser.email);
-        const { error: insertError } = await supabase
+        const { data: newProfile, error: insertError } = await supabase
           .from("profiles")
           .insert({
             id: authUser.id,
             name: authUser.user_metadata?.name || authUser.email?.split('@')[0] || "",
             plan: "free"
-          });
+          })
+          .select()
+          .single();
         
         if (insertError) {
           console.error("Error creating profile:", insertError);
+        } else {
+          userProfile = newProfile;
         }
-      } else if (profileError) {
-        console.error("Error fetching profile:", profileError);
       }
+
+      // Create user object
+      const userObj: User = {
+        id: authUser.id,
+        email: authUser.email || "",
+        name: userProfile?.name || authUser.user_metadata?.name || authUser.email?.split('@')[0] || "",
+        plan: (userProfile?.plan as "free" | "individual" | "team") || "free",
+      };
+      
+      console.log("Setting user:", userObj.email, "with plan:", userObj.plan);
+      setUser(userObj);
+
     } catch (error) {
       console.error("Error processing user:", error);
-      // Still set user even if profile fetch fails
+      // Still set user even if profile operations fail
       const userObj: User = {
         id: authUser.id,
         email: authUser.email || "",
@@ -367,6 +381,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const login = async (email: string, password: string) => {
     try {
       console.log("Attempting login for:", email);
+      setIsLoading(true);
       
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
@@ -392,6 +407,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         description: error instanceof Error ? error.message : "Please check your credentials and try again",
         variant: "destructive",
       });
+      setIsLoading(false);
       return false;
     }
   };
@@ -399,6 +415,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const signup = async (name: string, email: string, password: string) => {
     try {
       console.log("Attempting signup for:", email);
+      setIsLoading(true);
       
       // Sign up with Supabase Auth
       const { data, error } = await supabase.auth.signUp({
@@ -428,6 +445,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         description: error instanceof Error ? error.message : "Please check your information and try again",
         variant: "destructive",
       });
+      setIsLoading(false);
       return false;
     }
   };
@@ -498,6 +516,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       });
     }
   };
+
+  // Fetch saved signatures when user changes
+  useEffect(() => {
+    if (user) {
+      refreshSignatures();
+    } else {
+      setSavedSignatures([]);
+    }
+  }, [user]);
 
   return (
     <AuthContext.Provider value={{ 
