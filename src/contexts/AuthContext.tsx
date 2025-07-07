@@ -48,7 +48,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   useEffect(() => {
     console.log("AuthProvider - Setting up auth listener");
     
-    // Check for existing session immediately
+    // Set up auth state change listener first
+    const { data: authListener } = supabase.auth.onAuthStateChange(async (event, session) => {
+      console.log("Auth state changed:", event, session ? `User: ${session.user.email}` : "No session");
+      
+      if (session?.user) {
+        await processUser(session.user);
+      } else {
+        setUser(null);
+      }
+      setIsLoading(false);
+    });
+
+    // Then check for existing session
     const checkSession = async () => {
       try {
         const { data: { session }, error } = await supabase.auth.getSession();
@@ -73,18 +85,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     checkSession();
 
-    // Set up auth state change listener
-    const { data: authListener } = supabase.auth.onAuthStateChange(async (event, session) => {
-      console.log("Auth state changed:", event, session ? `User: ${session.user.email}` : "No session");
-      
-      if (session?.user) {
-        await processUser(session.user);
-      } else {
-        setUser(null);
-      }
-      setIsLoading(false);
-    });
-
     return () => {
       console.log("Cleaning up auth listener");
       authListener.subscription.unsubscribe();
@@ -93,6 +93,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const processUser = async (authUser: any) => {
     try {
+      console.log("Processing user:", authUser.email);
+      
       // Fetch user profile from database
       const { data: profileData, error: profileError } = await supabase
         .from("profiles")
@@ -100,11 +102,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         .eq("id", authUser.id)
         .single();
 
-      if (profileError && profileError.code !== 'PGRST116') {
-        console.error("Error fetching profile:", profileError);
-      }
-
-      // Create user object with profile data
+      // Create user object with profile data or defaults
       const userObj: User = {
         id: authUser.id,
         email: authUser.email || "",
@@ -112,10 +110,36 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         plan: (profileData?.plan as "free" | "individual" | "team") || "free",
       };
       
-      console.log("Setting user:", userObj.email);
+      console.log("Setting user:", userObj.email, "with plan:", userObj.plan);
       setUser(userObj);
+
+      // If profile doesn't exist, create one
+      if (profileError && profileError.code === 'PGRST116') {
+        console.log("Creating new profile for user:", authUser.email);
+        const { error: insertError } = await supabase
+          .from("profiles")
+          .insert({
+            id: authUser.id,
+            name: authUser.user_metadata?.name || authUser.email?.split('@')[0] || "",
+            plan: "free"
+          });
+        
+        if (insertError) {
+          console.error("Error creating profile:", insertError);
+        }
+      } else if (profileError) {
+        console.error("Error fetching profile:", profileError);
+      }
     } catch (error) {
       console.error("Error processing user:", error);
+      // Still set user even if profile fetch fails
+      const userObj: User = {
+        id: authUser.id,
+        email: authUser.email || "",
+        name: authUser.user_metadata?.name || authUser.email?.split('@')[0] || "",
+        plan: "free",
+      };
+      setUser(userObj);
     }
   };
 
