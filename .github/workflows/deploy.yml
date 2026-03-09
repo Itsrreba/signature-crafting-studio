@@ -2,7 +2,8 @@ name: Deploy to GitHub Pages
 
 on:
   push:
-    branches: [main]
+    branches:
+      - main
 
 jobs:
   deploy:
@@ -10,9 +11,11 @@ jobs:
     permissions:
       contents: write
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout
+        uses: actions/checkout@v3
 
-      - uses: actions/setup-node@v3
+      - name: Setup Node
+        uses: actions/setup-node@v3
         with:
           node-version: 18
 
@@ -22,26 +25,8 @@ jobs:
       - name: Build
         run: npm run build
 
-      - name: Deploy to GitHub Pages
+      - name: Deploy
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./dist
-```
-
-4. Click **"Commit changes"** → **"Commit changes"** again
-
----
-
-## 🌐 Stage 3 — Enable GitHub Pages
-
-1. In your repo, go to **Settings** (top menu)
-2. Scroll down on the left sidebar and click **"Pages"**
-3. Under **"Branch"**, select **`gh-pages`** from the dropdown
-4. Click **Save**
-
----
-
-## ⏳ Wait ~2 minutes then visit:
-```
-https://itsrreba.github.io/signature-crafting-studio/
